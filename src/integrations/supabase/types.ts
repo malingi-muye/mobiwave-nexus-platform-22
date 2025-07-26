@@ -755,26 +755,38 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          email: string | null
           first_name: string | null
+          full_name: string | null
           id: string
           last_name: string | null
+          role: string | null
           updated_at: string | null
+          user_type: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
+          full_name?: string | null
           id: string
           last_name?: string | null
+          role?: string | null
           updated_at?: string | null
+          user_type?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          email?: string | null
           first_name?: string | null
+          full_name?: string | null
           id?: string
           last_name?: string | null
+          role?: string | null
           updated_at?: string | null
+          user_type?: string | null
         }
         Relationships: []
       }
@@ -1233,7 +1245,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
+      user_has_permission: {
+        Args: { user_uuid: string; permission_name: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
