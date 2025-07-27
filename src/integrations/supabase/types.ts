@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_api_keys: {
         Row: {
           api_key_hash: string
@@ -284,6 +320,39 @@ export type Database = {
         }
         Relationships: []
       }
+      api_credentials: {
+        Row: {
+          api_key_encrypted: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          service_name: string
+          updated_at: string | null
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          api_key_encrypted: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          service_name: string
+          updated_at?: string | null
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          api_key_encrypted?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          service_name?: string
+          updated_at?: string | null
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string | null
@@ -393,6 +462,60 @@ export type Database = {
           },
         ]
       }
+      campaigns: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          delivered_count: number | null
+          failed_count: number | null
+          id: string
+          message: string
+          name: string
+          recipient_count: number | null
+          scheduled_at: string | null
+          sender_id: string | null
+          sent_at: string | null
+          sent_count: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message: string
+          name: string
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          sender_id?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_count?: number | null
+          failed_count?: number | null
+          id?: string
+          message?: string
+          name?: string
+          recipient_count?: number | null
+          scheduled_at?: string | null
+          sender_id?: string | null
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       channels: {
         Row: {
           created_at: string | null
@@ -443,6 +566,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contacts: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          metadata: Json | null
+          phone: string
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          metadata?: Json | null
+          phone: string
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          metadata?: Json | null
+          phone?: string
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       files: {
         Row: {
@@ -1023,6 +1185,81 @@ export type Database = {
         }
         Relationships: []
       }
+      services_catalog: {
+        Row: {
+          configuration: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          pricing: Json | null
+          service_name: string
+          service_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          pricing?: Json | null
+          service_name: string
+          service_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          pricing?: Json | null
+          service_name?: string
+          service_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      system_audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       system_events: {
         Row: {
           created_at: string | null
@@ -1064,6 +1301,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_credits: {
+        Row: {
+          created_at: string | null
+          credits_balance: number | null
+          credits_used: number | null
+          id: string
+          last_updated: string | null
+          service_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          credits_balance?: number | null
+          credits_used?: number | null
+          id?: string
+          last_updated?: string | null
+          service_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          credits_balance?: number | null
+          credits_used?: number | null
+          id?: string
+          last_updated?: string | null
+          service_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_organizations: {
         Row: {
@@ -1188,6 +1455,50 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_service_subscriptions: {
+        Row: {
+          configuration: Json | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          service_id: string | null
+          status: string | null
+          subscribed_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          service_id?: string | null
+          status?: string | null
+          subscribed_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          service_id?: string | null
+          status?: string | null
+          subscribed_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_service_subscriptions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_catalog"
             referencedColumns: ["id"]
           },
         ]

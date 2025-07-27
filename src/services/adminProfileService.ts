@@ -15,6 +15,8 @@ export interface AdminProfile {
   role: string;
   created_at: string;
   updated_at: string;
+  admin_preferences?: AdminPreferences;
+  admin_security_settings?: AdminSecuritySettings;
 }
 
 export interface AdminSecuritySettings {
