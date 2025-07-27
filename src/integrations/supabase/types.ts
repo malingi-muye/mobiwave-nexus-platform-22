@@ -756,10 +756,12 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           email: string | null
+          failed_login_attempts: number | null
           first_name: string | null
           full_name: string | null
           id: string
           last_name: string | null
+          locked_until: string | null
           role: string | null
           updated_at: string | null
           user_type: string | null
@@ -768,10 +770,12 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          failed_login_attempts?: number | null
           first_name?: string | null
           full_name?: string | null
           id: string
           last_name?: string | null
+          locked_until?: string | null
           role?: string | null
           updated_at?: string | null
           user_type?: string | null
@@ -780,10 +784,12 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           email?: string | null
+          failed_login_attempts?: number | null
           first_name?: string | null
           full_name?: string | null
           id?: string
           last_name?: string | null
+          locked_until?: string | null
           role?: string | null
           updated_at?: string | null
           user_type?: string | null
