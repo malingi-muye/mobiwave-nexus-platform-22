@@ -117,7 +117,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
       setSelectedModel('');
       setUploadProgress(0);
       
-      if (onUploadComplete) {
+      if (onUploadComplete && job?.id) {
         onUploadComplete(job.id);
       }
 

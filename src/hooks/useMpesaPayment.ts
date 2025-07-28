@@ -23,7 +23,7 @@ interface TransactionRecord {
   type: string;
   status: string;
   reference?: string;
-  user_id?: string;
+  user_id: string;
 }
 
 export const useMpesaPayment = () => {

@@ -4,6 +4,12 @@ export interface ServiceActivationRequest {
   user_id: string;
   service_id: string;
   status: string;
+  business_justification: string;
+  expected_usage: string;
+  priority: string;
+  created_at: string;
+  processed_at: string | null;
+  admin_notes: string | null;
   requested_at: string;
   approved_at?: string;
   approved_by?: string;

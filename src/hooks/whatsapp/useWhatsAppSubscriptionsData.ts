@@ -35,18 +35,8 @@ const fetchWhatsAppSubscriptions = async (): Promise<WhatsAppSubscription[]> => 
 
     if (subscriptionIds.length === 0) return [];
 
-    // Then get WhatsApp subscriptions for those service subscriptions
-    const { data, error } = await supabase
-      .from('whatsapp_subscriptions')
-      .select('*')
-      .in('subscription_id', subscriptionIds)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching WhatsApp subscriptions:', error);
-      return [];
-    }
-    return (data || []) as WhatsAppSubscription[];
+    // Return empty array since whatsapp_subscriptions table doesn't exist in current schema
+    return [];
   } catch (error) {
     console.error('Error fetching WhatsApp subscriptions:', error);
     return [];

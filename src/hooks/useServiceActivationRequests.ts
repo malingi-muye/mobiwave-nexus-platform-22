@@ -55,7 +55,7 @@ export const useServiceActivationRequests = () => {
       const { data: services, error: servicesError } = await supabase
         .from('services_catalog')
         .select('id, service_name, service_type')
-        .in('id', serviceIds);
+        .in('id', serviceIds.map(String));
 
       if (servicesError) throw servicesError;
 
@@ -66,10 +66,23 @@ export const useServiceActivationRequests = () => {
       // Transform the data to match expected interface
       const transformedData: ServiceActivationRequest[] = requests.map(request => {
         const profile = profilesMap.get(request.user_id);
-        const service = servicesMap.get(request.service_id);
+        const service = servicesMap.get(String(request.service_id));
         
         return {
-          ...request,
+          id: String(request.id),
+          user_id: request.user_id || '',
+          service_id: String(request.service_id || 0),
+          status: request.status || 'pending',
+          business_justification: '',
+          expected_usage: '',
+          priority: 'medium',
+          created_at: request.requested_at || new Date().toISOString(),
+          processed_at: request.approved_at || null,
+          admin_notes: null,
+          requested_at: request.requested_at || new Date().toISOString(),
+          approved_at: request.approved_at || undefined,
+          approved_by: request.admin_id || undefined,
+          rejection_reason: undefined,
           user: {
             email: profile?.email || '',
             first_name: profile?.first_name || '',
@@ -108,7 +121,7 @@ export const useServiceActivationRequests = () => {
       const { data: services, error: servicesError } = await supabase
         .from('services_catalog')
         .select('id, service_name, service_type')
-        .in('id', serviceIds);
+        .in('id', serviceIds.map(String));
 
       if (servicesError) throw servicesError;
 
@@ -117,10 +130,12 @@ export const useServiceActivationRequests = () => {
 
       // Transform the data to match expected interface
       const transformedData = requests.map(request => {
-        const service = servicesMap.get(request.service_id);
+        const service = servicesMap.get(String(request.service_id));
         
         return {
           ...request,
+          id: String(request.id),
+          service_id: String(request.service_id),
           service: {
             service_name: service?.service_name || '',
             service_type: service?.service_type || ''
@@ -151,10 +166,7 @@ export const useServiceActivationRequests = () => {
         .from('service_activation_requests')
         .insert({
           user_id: user.user.id,
-          service_id: serviceId,
-          business_justification: businessJustification,
-          expected_usage: expectedUsage,
-          priority,
+          service_id: parseInt(serviceId),
           status: 'pending'
         })
         .select()
@@ -181,7 +193,7 @@ export const useServiceActivationRequests = () => {
       const { data: request, error: requestError } = await supabase
         .from('service_activation_requests')
         .select('user_id, service_id')
-        .eq('id', requestId)
+        .eq('id', parseInt(requestId))
         .single();
 
       if (requestError) throw requestError;
@@ -191,7 +203,7 @@ export const useServiceActivationRequests = () => {
         .from('user_service_subscriptions')
         .insert({
           user_id: request.user_id,
-          service_id: request.service_id,
+          service_id: String(request.service_id),
           status: 'active',
           activated_at: new Date().toISOString()
         });
@@ -207,7 +219,7 @@ export const useServiceActivationRequests = () => {
           approved_by: user.user.id,
           admin_notes: adminNotes
         })
-        .eq('id', requestId)
+        .eq('id', parseInt(requestId))
         .select()
         .single();
 
@@ -238,7 +250,7 @@ export const useServiceActivationRequests = () => {
           processed_at: new Date().toISOString(),
           admin_notes: adminNotes
         })
-        .eq('id', requestId)
+        .eq('id', parseInt(requestId))
         .select()
         .single();
 

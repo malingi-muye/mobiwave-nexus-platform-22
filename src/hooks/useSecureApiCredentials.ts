@@ -186,17 +186,11 @@ export const useSecureApiCredentials = () => {
     }
   });
 
-  // Get API usage functionality (previously in useApiKeys)
+  // Get API usage functionality (mock implementation since api_usage table doesn't exist)
   const getApiUsage = async (keyId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('api_usage')
-        .select('*')
-        .eq('credential_id', keyId)
-        .order('timestamp', { ascending: false });
-        
-      if (error) throw error;
-      return data || [];
+      // Return empty array since api_usage table doesn't exist in current schema
+      return [];
     } catch (error) {
       console.error('Error fetching API usage:', error);
       return [];

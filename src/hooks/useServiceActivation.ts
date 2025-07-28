@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ServiceActivationRequest {
-  serviceId: string;
+  serviceId: number;
   businessJustification?: string;
   expectedUsage?: string;
   priority?: string;

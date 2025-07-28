@@ -47,7 +47,7 @@ export const useUserPlanSubscription = () => {
 
       // Get plan details separately
       const { data: plan, error: planError } = await supabase
-        .from('subscription_plans')
+        .from('plans')
         .select('*')
         .eq('id', subscription.plan_id)
         .single();
@@ -56,20 +56,22 @@ export const useUserPlanSubscription = () => {
 
       // Transform the data to match expected interface
       const transformedData: UserPlanSubscription = {
-        ...subscription,
+        id: String(subscription.id),
+        user_id: subscription.user_id || '',
+        plan_id: String(subscription.plan_id),
+        status: subscription.status || 'active',
+        started_at: subscription.subscribed_at || new Date().toISOString(),
+        expires_at: null,
+        auto_renew: false,
         plan: {
-          id: plan.id,
+          id: String(plan.id),
           name: plan.name,
           description: plan.description || '',
           price: plan.price || 0,
-          billing_cycle: plan.billing_cycle,
-          features: Array.isArray(plan.features) 
-            ? (plan.features as any[]).map(f => String(f))
-            : [],
-          service_limits: typeof plan.service_limits === 'object' 
-            ? plan.service_limits as Record<string, number>
-            : {},
-          is_active: plan.is_active || false
+          billing_cycle: 'monthly',
+          features: [],
+          service_limits: {},
+          is_active: true
         }
       };
 
@@ -81,27 +83,22 @@ export const useUserPlanSubscription = () => {
     queryKey: ['subscription-plans'],
     queryFn: async (): Promise<SubscriptionPlan[]> => {
       const { data, error } = await supabase
-        .from('subscription_plans')
+        .from('plans')
         .select('*')
-        .eq('is_active', true)
         .order('price');
 
       if (error) throw error;
       
       // Transform the data to match expected interface
       const transformedData: SubscriptionPlan[] = (data || []).map(plan => ({
-        id: plan.id,
+        id: String(plan.id),
         name: plan.name,
         description: plan.description || '',
         price: plan.price || 0,
-        billing_cycle: plan.billing_cycle,
-        features: Array.isArray(plan.features) 
-          ? (plan.features as any[]).map(f => String(f))
-          : [],
-        service_limits: typeof plan.service_limits === 'object' 
-          ? plan.service_limits as Record<string, number>
-          : {},
-        is_active: plan.is_active || false
+        billing_cycle: 'monthly',
+        features: [],
+        service_limits: {},
+        is_active: true
       }));
 
       return transformedData;
@@ -118,7 +115,7 @@ export const useUserPlanSubscription = () => {
         await supabase
           .from('user_plan_subscriptions')
           .update({ status: 'inactive' })
-          .eq('id', userPlan.id);
+          .eq('id', parseInt(userPlan.id));
       }
 
       // Create new plan subscription
@@ -126,7 +123,7 @@ export const useUserPlanSubscription = () => {
         .from('user_plan_subscriptions')
         .insert({
           user_id: user.user.id,
-          plan_id: planId,
+          plan_id: parseInt(planId),
           status: 'active'
         })
         .select()

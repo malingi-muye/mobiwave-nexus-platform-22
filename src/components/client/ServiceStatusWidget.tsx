@@ -56,7 +56,7 @@ export function ServiceStatusWidget() {
   const handleRequestAccess = async (serviceId: string) => {
     setPendingServiceId(serviceId);
     try {
-      await requestServiceActivation({ serviceId });
+      await requestServiceActivation({ serviceId: parseInt(serviceId) });
     } catch (error) {
       // toast error happens inside hook
     } finally {
