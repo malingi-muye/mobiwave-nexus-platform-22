@@ -136,50 +136,46 @@ serve(async (req) => {
 
 async function getAdminProfile(userId: string, supabase: any) {
   try {
-    // Get profile data
+    // Get main profile data
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        admin_profiles (
-          phone,
-          company,
-          department,
-          job_title,
-          bio,
-          avatar_url,
-          avatar_file_name
-        ),
-        admin_security_settings (
-          two_factor_enabled,
-          session_timeout,
-          ip_whitelist,
-          last_login,
-          login_attempts,
-          password_change_required
-        ),
-        admin_preferences (
-          theme,
-          timezone,
-          date_format,
-          time_format,
-          email_notifications,
-          sms_notifications,
-          system_alerts,
-          security_alerts,
-          performance_alerts,
-          backup_notifications,
-          user_activity_alerts,
-          maintenance_notifications
-        )
-      `)
+      .select('*')
       .eq('id', userId)
       .single();
 
     if (profileError) throw profileError;
 
+    // Get admin profile data
+    const { data: adminProfile, error: adminProfileError } = await supabase
+      .from('admin_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    // Get admin security settings
+    const { data: securitySettings, error: securityError } = await supabase
+      .from('admin_security_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    // Get admin preferences
+    const { data: preferences, error: preferencesError } = await supabase
+      .from('admin_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    // Combine all data
+    const combinedData = {
+      ...profileData,
+      ...adminProfile,
+      admin_security_settings: securitySettings,
+      admin_preferences: preferences
+    };
+
     return new Response(
-      JSON.stringify({ data: profileData }),
+      JSON.stringify({ data: combinedData }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
