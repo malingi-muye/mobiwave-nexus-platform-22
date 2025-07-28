@@ -28,10 +28,10 @@ const fetchUSSDApplications = async (): Promise<USSDApplication[]> => {
     
     return (data || []).map((item: any) => ({
       id: item.id,
-      service_code: item.service_code,
-      menu_structure: Array.isArray(item.menu_structure) ? item.menu_structure as MenuNode[] : [],
-      callback_url: item.callback_url,
-      status: item.status || 'pending'
+      service_code: item.shortcode || item.name,
+      menu_structure: Array.isArray(item.flow_config) ? item.flow_config as MenuNode[] : [],
+      callback_url: '',
+      status: item.is_active ? 'active' : 'pending'
     }));
   } catch (error) {
     console.error('Failed to fetch USSD applications:', error);
@@ -92,11 +92,10 @@ export function USSDApplicationBuilder() {
         const { data, error } = await supabase
           .from('mspace_ussd_applications')
           .insert({
-            subscription_id: newSubscription.id,
-            service_code: appData.service_code,
-            menu_structure: appData.menu_structure as any,
-            callback_url: appData.callback_url,
-            status: 'pending'
+            user_id: user.id,
+            name: appData.service_code,
+            shortcode: appData.service_code,
+            flow_config: appData.menu_structure as any
           })
           .select()
           .single();
@@ -107,11 +106,10 @@ export function USSDApplicationBuilder() {
         const { data, error } = await supabase
           .from('mspace_ussd_applications')
           .insert({
-            subscription_id: subscription.id,
-            service_code: appData.service_code,
-            menu_structure: appData.menu_structure as any,
-            callback_url: appData.callback_url,
-            status: 'pending'
+            user_id: user.id,
+            name: appData.service_code,
+            shortcode: appData.service_code,
+            flow_config: appData.menu_structure as any
           })
           .select()
           .single();
@@ -136,9 +134,9 @@ export function USSDApplicationBuilder() {
       const { data, error } = await supabase
         .from('mspace_ussd_applications')
         .update({
-          service_code: appData.service_code,
-          menu_structure: appData.menu_structure as any,
-          callback_url: appData.callback_url
+          name: appData.service_code,
+          shortcode: appData.service_code,
+          flow_config: appData.menu_structure as any
         })
         .eq('id', appData.id)
         .select()
@@ -198,7 +196,7 @@ export function USSDApplicationBuilder() {
   const handleEdit = (app: USSDApplication) => {
     setEditingApp(app);
     setServiceCode(app.service_code);
-    setCallbackUrl(app.callback_url);
+    setCallbackUrl(app.callback_url || '');
     setMenuStructure(app.menu_structure);
     setIsCreating(true);
   };

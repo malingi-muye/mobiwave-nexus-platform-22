@@ -108,7 +108,7 @@ export function GuidedBulkSMSFlow() {
         recipient_count: campaignData.recipients.length,
         status: 'sending',
         // data_model_id: campaignData.dataModelId,
-        target_criteria: campaignData.targetCriteria,
+        // target_criteria: campaignData.targetCriteria,
         scheduled_at: campaignData.scheduledAt
       });
 

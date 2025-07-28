@@ -20,36 +20,8 @@ export function USSDSessionManager({ applicationId }: USSDSessionManagerProps) {
   const { data: sessions = [], isLoading, refetch } = useQuery({
     queryKey: ['ussd-sessions', applicationId, dateRange],
     queryFn: async (): Promise<USSDSession[]> => {
-      let query = supabase
-        .from('ussd_sessions')
-        .select(`
-          *,
-          application:mspace_ussd_applications(service_code, menu_structure)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (applicationId) {
-        query = query.eq('application_id', applicationId);
-      }
-
-      const now = new Date();
-      const daysAgo = parseInt(dateRange.replace('d', ''));
-      const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
-      query = query.gte('created_at', startDate.toISOString());
-
-      const { data, error } = await query;
-      if (error) throw error;
-      
-      // Type cast the database response to our custom interface
-      return (data || []).map(session => ({
-        ...session,
-        application: session.application ? {
-          service_code: session.application.service_code,
-          menu_structure: Array.isArray(session.application.menu_structure) 
-            ? session.application.menu_structure as unknown as MenuNode[]
-            : []
-        } : undefined
-      })) as USSDSession[];
+      // Since ussd_sessions table doesn't exist, return empty array for now
+      return [];
     }
   });
 

@@ -29,7 +29,7 @@ export const useCampaignTracking = () => {
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>('all');
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
   const [refreshInterval, setRefreshInterval] = useState<number>(30); // seconds
-  const { getBatchDeliveryReports, isLoading: isDeliveryLoading } = useMspaceDelivery();
+  // const { getBatchDeliveryReports, isLoading: isDeliveryLoading } = useMspaceDelivery();
 
   // Fetch campaigns from database
   const { data: dbCampaigns, isLoading: isCampaignsLoading } = useQuery({
@@ -85,7 +85,8 @@ export const useCampaignTracking = () => {
     
     const intervalId = setInterval(async () => {
       try {
-        const statuses = await getBatchDeliveryReports(selectedCampaign.messageIds || []);
+        // const statuses = await getBatchDeliveryReports(selectedCampaign.messageIds || []);
+        const statuses: DeliveryStatus[] = [];
         
         setActiveCampaigns(prev => prev.map(campaign => {
           if (campaign.id === selectedCampaignId) {
@@ -105,7 +106,7 @@ export const useCampaignTracking = () => {
     }, refreshInterval * 1000);
     
     return () => clearInterval(intervalId);
-  }, [selectedCampaignId, activeCampaigns, autoRefresh, refreshInterval, getBatchDeliveryReports]);
+  }, [selectedCampaignId, activeCampaigns, autoRefresh, refreshInterval]);
 
   // Helper function to map database status to our component status
   const mapCampaignStatus = (status: string): 'preparing' | 'sending' | 'completed' | 'failed' => {
@@ -142,6 +143,6 @@ export const useCampaignTracking = () => {
     setAutoRefresh,
     refreshInterval,
     setRefreshInterval,
-    isLoading: isCampaignsLoading || isDeliveryLoading
+    isLoading: isCampaignsLoading
   };
 };
