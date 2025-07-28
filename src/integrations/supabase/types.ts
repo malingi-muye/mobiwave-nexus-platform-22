@@ -611,6 +611,7 @@ export type Database = {
       }
       contact_groups: {
         Row: {
+          contact_count: number | null
           created_at: string | null
           description: string | null
           id: string
@@ -619,6 +620,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          contact_count?: number | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -627,6 +629,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          contact_count?: number | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -642,6 +645,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           id: string
+          is_active: boolean | null
           last_name: string | null
           metadata: Json | null
           phone: string
@@ -654,6 +658,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           last_name?: string | null
           metadata?: Json | null
           phone: string
@@ -666,6 +671,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           id?: string
+          is_active?: boolean | null
           last_name?: string | null
           metadata?: Json | null
           phone?: string
@@ -1484,6 +1490,42 @@ export type Database = {
           transaction_fee_amount?: number | null
           transaction_fee_type?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sms_templates: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+          variables: string[] | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+          variables?: string[] | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+          variables?: string[] | null
         }
         Relationships: []
       }

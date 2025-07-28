@@ -132,7 +132,7 @@ export const useUnifiedSMSService = () => {
   });
 
   return {
-    sendUnifiedSMS: sendUnifiedSMS.mutate,
+    sendUnifiedSMS: sendUnifiedSMS.mutateAsync,
     sendUnifiedSMSAsync: sendUnifiedSMS.mutateAsync,
     isLoading: sendUnifiedSMS.isPending,
     error: sendUnifiedSMS.error,
