@@ -40,8 +40,7 @@ export function ModelBuilder() {
     createDataModel({
         name,
         description,
-        fields,
-        user_id: ''
+        fields
     });
 
     // Reset form

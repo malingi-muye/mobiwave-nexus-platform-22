@@ -3,10 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface SMSData {
-  phone: string;
+  recipients: string[];
   message: string;
   senderId?: string;
   scheduledFor?: string;
+  campaignName?: string;
+  scheduleConfig?: any;
+  metadata?: any;
 }
 
 export interface BulkSMSData {
@@ -64,6 +67,10 @@ export const useUnifiedSMSService = () => {
           success: true, 
           messageId: messageHistory.id,
           recipientCount: bulkData.recipients.length,
+          delivered: bulkData.recipients.length,
+          failed: 0,
+          scheduled: bulkData.scheduleConfig ? true : false,
+          automated: false,
           type: 'bulk'
         };
       } else {
@@ -74,7 +81,7 @@ export const useUnifiedSMSService = () => {
           .from('message_history')
           .insert({
             type: 'sms',
-            recipient: singleData.phone,
+            recipient: singleData.recipients[0],
             sender: singleData.senderId || 'MOBIWAVE',
             content: singleData.message,
             status: 'sent',
@@ -99,6 +106,10 @@ export const useUnifiedSMSService = () => {
         return { 
           success: true, 
           messageId: messageHistory.id,
+          delivered: 1,
+          failed: 0,
+          scheduled: false,
+          automated: false,
           type: 'single'
         };
       }
