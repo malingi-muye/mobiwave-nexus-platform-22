@@ -17,7 +17,7 @@ export const ResponsiveViewport: React.FC = () => {
       // If it doesn't exist, create it
       if (!viewportMeta) {
         viewportMeta = document.createElement('meta');
-        viewportMeta.name = 'viewport';
+        (viewportMeta as HTMLMetaElement).name = 'viewport';
         document.head.appendChild(viewportMeta);
       }
       

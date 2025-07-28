@@ -573,6 +573,69 @@ export type Database = {
           },
         ]
       }
+      contact_group_members: {
+        Row: {
+          contact_id: string
+          created_at: string | null
+          group_id: string
+          id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string | null
+          group_id: string
+          id?: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string | null
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_contact_group_members_contact_id"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_contact_group_members_group_id"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "contact_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           created_at: string | null
@@ -643,6 +706,36 @@ export type Database = {
           reference?: string | null
           status?: string | null
           type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_models: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          schema: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          schema?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          schema?: Json | null
           updated_at?: string | null
           user_id?: string
         }
@@ -828,6 +921,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mspace_pesa_integrations: {
+        Row: {
+          business_shortcode: string | null
+          callback_url: string | null
+          consumer_key: string | null
+          consumer_secret: string | null
+          created_at: string | null
+          environment: string | null
+          id: string
+          is_active: boolean | null
+          passkey: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_shortcode?: string | null
+          callback_url?: string | null
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string | null
+          environment?: string | null
+          id?: string
+          is_active?: boolean | null
+          passkey?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_shortcode?: string | null
+          callback_url?: string | null
+          consumer_key?: string | null
+          consumer_secret?: string | null
+          created_at?: string | null
+          environment?: string | null
+          id?: string
+          is_active?: boolean | null
+          passkey?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -1076,6 +1211,44 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_campaigns: {
+        Row: {
+          campaign_id: string
+          created_at: string | null
+          id: string
+          scheduled_for: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string | null
+          id?: string
+          scheduled_for: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string | null
+          id?: string
+          scheduled_for?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_scheduled_campaigns_campaign_id"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_events: {
         Row: {
           created_at: string | null
@@ -1237,9 +1410,12 @@ export type Database = {
           is_premium: boolean | null
           monthly_fee: number | null
           pricing: Json | null
+          provider: string | null
           service_name: string
           service_type: string
           setup_fee: number | null
+          transaction_fee_amount: number | null
+          transaction_fee_type: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1251,9 +1427,12 @@ export type Database = {
           is_premium?: boolean | null
           monthly_fee?: number | null
           pricing?: Json | null
+          provider?: string | null
           service_name: string
           service_type: string
           setup_fee?: number | null
+          transaction_fee_amount?: number | null
+          transaction_fee_type?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1265,9 +1444,12 @@ export type Database = {
           is_premium?: boolean | null
           monthly_fee?: number | null
           pricing?: Json | null
+          provider?: string | null
           service_name?: string
           service_type?: string
           setup_fee?: number | null
+          transaction_fee_amount?: number | null
+          transaction_fee_type?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1284,6 +1466,8 @@ export type Database = {
           old_data: Json | null
           old_values: Json | null
           record_id: string | null
+          severity: string | null
+          status: string | null
           table_name: string | null
           user_agent: string | null
           user_id: string | null
@@ -1299,6 +1483,8 @@ export type Database = {
           old_data?: Json | null
           old_values?: Json | null
           record_id?: string | null
+          severity?: string | null
+          status?: string | null
           table_name?: string | null
           user_agent?: string | null
           user_id?: string | null
@@ -1314,6 +1500,8 @@ export type Database = {
           old_data?: Json | null
           old_values?: Json | null
           record_id?: string | null
+          severity?: string | null
+          status?: string | null
           table_name?: string | null
           user_agent?: string | null
           user_id?: string | null

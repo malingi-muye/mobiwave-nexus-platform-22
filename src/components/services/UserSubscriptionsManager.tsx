@@ -158,7 +158,7 @@ export function UserSubscriptionsManager() {
       const { data, error } = await supabase
         .from('user_plan_subscriptions')
         .update({ status: 'cancelled' })
-        .eq('id', subscriptionId)
+        .eq('id', parseInt(subscriptionId))
         .select()
         .single();
       if (error) throw error;
