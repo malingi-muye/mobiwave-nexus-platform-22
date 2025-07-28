@@ -483,6 +483,7 @@ export type Database = {
           sent_at: string | null
           sent_count: number | null
           status: string | null
+          target_criteria: Json | null
           type: string | null
           updated_at: string | null
           user_id: string
@@ -504,6 +505,7 @@ export type Database = {
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
+          target_criteria?: Json | null
           type?: string | null
           updated_at?: string | null
           user_id: string
@@ -525,6 +527,7 @@ export type Database = {
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
+          target_criteria?: Json | null
           type?: string | null
           updated_at?: string | null
           user_id?: string
@@ -584,18 +587,21 @@ export type Database = {
       }
       contact_group_members: {
         Row: {
+          added_at: string | null
           contact_id: string
           created_at: string | null
           group_id: string
           id: string
         }
         Insert: {
+          added_at?: string | null
           contact_id: string
           created_at?: string | null
           group_id: string
           id?: string
         }
         Update: {
+          added_at?: string | null
           contact_id?: string
           created_at?: string | null
           group_id?: string
@@ -1185,6 +1191,41 @@ export type Database = {
           user_type?: string | null
         }
         Relationships: []
+      }
+      records: {
+        Row: {
+          created_at: string | null
+          data: Json
+          id: string
+          model_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json
+          id?: string
+          model_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          id?: string
+          model_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "records_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "data_models"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
