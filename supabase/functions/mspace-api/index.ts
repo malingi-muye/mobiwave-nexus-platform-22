@@ -111,13 +111,14 @@ serve(async (req) => {
       throw new Error('No credentials available')
     }
 
-    const baseUrl = 'https://api.mspace.co.ke/mspaceservice/wr/sms'
+    // Try different API endpoints based on the test script findings
     let url = ''
     let responseData: any = null
 
     switch (operation) {
       case 'balance':
-        url = `${baseUrl}/balance/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        // Try the newer API endpoint first
+        url = `https://api.mspace.co.ke/smsapi/v2/balance?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
         break
 
       case 'sendSMS':
@@ -127,33 +128,35 @@ serve(async (req) => {
         const senderIdParam = senderId || mspaceCredentials.senderId || 'MSPACE'
         const encodedMessage = encodeURIComponent(message)
         const encodedRecipient = encodeURIComponent(recipient)
-        url = `${baseUrl}/sendtext/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/senderid=${senderIdParam}/recipient=${encodedRecipient}/message=${encodedMessage}`
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/sendtext/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/senderid=${senderIdParam}/recipient=${encodedRecipient}/message=${encodedMessage}`
         break
 
       case 'subUsers':
-        url = `${baseUrl}/subusers/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/subusers/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
         break
 
       case 'resellerClients':
-        url = `${baseUrl}/resellerclients/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        // Try the newer API endpoint
+        url = `https://api.mspace.co.ke/smsapi/v2/resellerclients?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
         break
 
       case 'topUpReseller':
         if (!clientname || !noofsms) {
           throw new Error('Client name and number of SMS are required for reseller top-up')
         }
-        url = `${baseUrl}/resellerclienttopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/clientname=${clientname}/noofsms=${noofsms}`
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/resellerclienttopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/clientname=${clientname}/noofsms=${noofsms}`
         break
 
       case 'topUpSub':
         if (!subaccname || !noofsms) {
           throw new Error('Sub account name and number of SMS are required for sub account top-up')
         }
-        url = `${baseUrl}/subacctopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/subaccname=${subaccname}/noofsms=${noofsms}`
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/subacctopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/subaccname=${subaccname}/noofsms=${noofsms}`
         break
 
       case 'login':
-        url = `${baseUrl}/login/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        // Try the balance endpoint for login test since there's no dedicated login endpoint
+        url = `https://api.mspace.co.ke/smsapi/v2/balance?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
         break
 
       default:
