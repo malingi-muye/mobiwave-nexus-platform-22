@@ -964,6 +964,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mspace_ussd_applications: {
+        Row: {
+          created_at: string | null
+          flow_config: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          shortcode: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          flow_config?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          shortcode?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          flow_config?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          shortcode?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           content: string | null
@@ -1811,6 +1844,42 @@ export type Database = {
           two_factor_enabled?: boolean | null
           two_factor_secret?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ussd_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          input_path: string | null
+          navigation_path: string[] | null
+          phone_number: string
+          session_id: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          input_path?: string | null
+          navigation_path?: string[] | null
+          phone_number: string
+          session_id: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          input_path?: string | null
+          navigation_path?: string[] | null
+          phone_number?: string
+          session_id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
