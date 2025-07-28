@@ -468,11 +468,14 @@ export type Database = {
       campaigns: {
         Row: {
           completed_at: string | null
+          content: string | null
+          cost: number | null
           created_at: string | null
           delivered_count: number | null
           failed_count: number | null
           id: string
           message: string
+          metadata: Json | null
           name: string
           recipient_count: number | null
           scheduled_at: string | null
@@ -486,11 +489,14 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          content?: string | null
+          cost?: number | null
           created_at?: string | null
           delivered_count?: number | null
           failed_count?: number | null
           id?: string
           message: string
+          metadata?: Json | null
           name: string
           recipient_count?: number | null
           scheduled_at?: string | null
@@ -504,11 +510,14 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          content?: string | null
+          cost?: number | null
           created_at?: string | null
           delivered_count?: number | null
           failed_count?: number | null
           id?: string
           message?: string
+          metadata?: Json | null
           name?: string
           recipient_count?: number | null
           scheduled_at?: string | null
@@ -823,6 +832,7 @@ export type Database = {
           subject: string | null
           type: string
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -845,6 +855,7 @@ export type Database = {
           subject?: string | null
           type: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -867,6 +878,7 @@ export type Database = {
           subject?: string | null
           type?: string
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1627,6 +1639,7 @@ export type Database = {
       }
       user_credits: {
         Row: {
+          balance: number | null
           created_at: string | null
           credits_balance: number | null
           credits_purchased: number | null
@@ -1635,10 +1648,12 @@ export type Database = {
           id: string
           last_updated: string | null
           service_type: string
+          total_purchased: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          balance?: number | null
           created_at?: string | null
           credits_balance?: number | null
           credits_purchased?: number | null
@@ -1647,10 +1662,12 @@ export type Database = {
           id?: string
           last_updated?: string | null
           service_type: string
+          total_purchased?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          balance?: number | null
           created_at?: string | null
           credits_balance?: number | null
           credits_purchased?: number | null
@@ -1659,6 +1676,7 @@ export type Database = {
           id?: string
           last_updated?: string | null
           service_type?: string
+          total_purchased?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1793,33 +1811,42 @@ export type Database = {
       }
       user_service_subscriptions: {
         Row: {
+          activated_at: string | null
           configuration: Json | null
           created_at: string | null
           expires_at: string | null
           id: string
+          monthly_billing_active: boolean | null
           service_id: string | null
+          setup_fee_paid: boolean | null
           status: string | null
           subscribed_at: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          activated_at?: string | null
           configuration?: Json | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          monthly_billing_active?: boolean | null
           service_id?: string | null
+          setup_fee_paid?: boolean | null
           status?: string | null
           subscribed_at?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          activated_at?: string | null
           configuration?: Json | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          monthly_billing_active?: boolean | null
           service_id?: string | null
+          setup_fee_paid?: boolean | null
           status?: string | null
           subscribed_at?: string | null
           updated_at?: string | null
@@ -1933,6 +1960,8 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          service_code: string | null
+          subscription_id: string | null
           trigger_config: Json | null
           trigger_type: string
           updated_at: string | null
@@ -1945,6 +1974,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          service_code?: string | null
+          subscription_id?: string | null
           trigger_config?: Json | null
           trigger_type: string
           updated_at?: string | null
@@ -1957,6 +1988,8 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          service_code?: string | null
+          subscription_id?: string | null
           trigger_config?: Json | null
           trigger_type?: string
           updated_at?: string | null

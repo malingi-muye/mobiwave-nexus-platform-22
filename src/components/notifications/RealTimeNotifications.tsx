@@ -27,7 +27,7 @@ export const RealTimeNotifications: React.FC = () => {
     onUpdate: (update) => {
       const notification: Notification = {
         id: `${update.type}-${Date.now()}`,
-        type: update.type,
+        type: update.type as "message" | "survey" | "system" | "campaign",
         title: getNotificationTitle(update),
         message: getNotificationMessage(update),
         timestamp: update.timestamp,
