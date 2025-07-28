@@ -27,45 +27,39 @@ export function CreditsManager() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Create a credit top-up request to the reseller
-      const { data, error } = await supabase
-        .from('credit_transactions')
-        .insert({
-          user_id: user.id,
-          type: 'topup_request',
-          amount: amount,
-          status: 'pending',
-          description: `Credit top-up request for ${amount} SMS credits`,
-          reference: `REQ-${Date.now()}`
-        })
-        .select()
+      // Check if user has existing credit record
+      const { data: existingCredits } = await supabase
+        .from('user_credits')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('service_type', 'sms')
         .single();
 
-      if (error) throw error;
-
-      // In a real implementation, this would notify the reseller admin
-      // For demo purposes, we'll auto-approve small amounts
-      if (amount <= 1000) {
-        // Auto-approve and add credits
-        const { error: updateError } = await supabase
+      // Create or update user credits record
+      if (!existingCredits) {
+        await supabase
+          .from('user_credits')
+          .insert({
+            user_id: user.id,
+            service_type: 'sms',
+            credits_remaining: amount,
+            credits_purchased: amount,
+            credits_balance: amount
+          });
+      } else {
+        await supabase
           .from('user_credits')
           .update({
-            credits_remaining: (credits?.credits_remaining || 0) + amount,
-            credits_purchased: (credits?.credits_purchased || 0) + amount,
-            updated_at: new Date().toISOString()
+            credits_remaining: amount,
+            credits_purchased: amount,
+            credits_balance: amount,
+            last_updated: new Date().toISOString()
           })
-          .eq('user_id', user.id);
-
-        if (updateError) throw updateError;
-
-        // Update transaction status
-        await supabase
-          .from('credit_transactions')
-          .update({ status: 'completed' })
-          .eq('id', data.id);
+          .eq('user_id', user.id)
+          .eq('service_type', 'sms');
       }
 
-      return data;
+      return { id: crypto.randomUUID(), amount };
     },
     onSuccess: (data, amount) => {
       if (amount <= 1000) {

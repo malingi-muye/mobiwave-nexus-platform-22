@@ -215,7 +215,7 @@ export function MspaceUserManagement() {
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
-            onClick={() => testCredentials.mutateAsync()}
+            onClick={() => testCredentials.mutateAsync().catch(() => {})}
             disabled={isTestingCredentials}
           >
             {isTestingCredentials ? <Clock className="w-4 h-4 mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
@@ -223,7 +223,7 @@ export function MspaceUserManagement() {
           </Button>
           <Button 
             variant="outline" 
-            onClick={() => checkBalance.mutateAsync()}
+            onClick={() => checkBalance.mutateAsync().catch(() => {})}
             disabled={isCheckingBalance}
           >
             {isCheckingBalance ? <Clock className="w-4 h-4 mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}

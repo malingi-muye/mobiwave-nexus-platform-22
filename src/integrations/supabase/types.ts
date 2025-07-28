@@ -155,6 +155,7 @@ export type Database = {
           created_at: string | null
           id: string
           ip_address: unknown | null
+          metadata: Json | null
           new_data: Json | null
           new_values: Json | null
           old_data: Json | null
@@ -169,6 +170,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           ip_address?: unknown | null
+          metadata?: Json | null
           new_data?: Json | null
           new_values?: Json | null
           old_data?: Json | null
@@ -183,6 +185,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           ip_address?: unknown | null
+          metadata?: Json | null
           new_data?: Json | null
           new_values?: Json | null
           old_data?: Json | null
@@ -477,6 +480,7 @@ export type Database = {
           sent_at: string | null
           sent_count: number | null
           status: string | null
+          type: string | null
           updated_at: string | null
           user_id: string
         }
@@ -494,6 +498,7 @@ export type Database = {
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
+          type?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -511,6 +516,7 @@ export type Database = {
           sent_at?: string | null
           sent_count?: number | null
           status?: string | null
+          type?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -601,6 +607,42 @@ export type Database = {
           metadata?: Json | null
           phone?: string
           tags?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          id: string
+          reference: string | null
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reference?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          reference?: string | null
+          status?: string | null
+          type?: string
           updated_at?: string | null
           user_id?: string
         }
@@ -1192,9 +1234,12 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          is_premium: boolean | null
+          monthly_fee: number | null
           pricing: Json | null
           service_name: string
           service_type: string
+          setup_fee: number | null
           updated_at: string | null
         }
         Insert: {
@@ -1203,9 +1248,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_premium?: boolean | null
+          monthly_fee?: number | null
           pricing?: Json | null
           service_name: string
           service_type: string
+          setup_fee?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -1214,9 +1262,12 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_premium?: boolean | null
+          monthly_fee?: number | null
           pricing?: Json | null
           service_name?: string
           service_type?: string
+          setup_fee?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1227,7 +1278,10 @@ export type Database = {
           created_at: string | null
           id: string
           ip_address: unknown | null
+          metadata: Json | null
+          new_data: Json | null
           new_values: Json | null
+          old_data: Json | null
           old_values: Json | null
           record_id: string | null
           table_name: string | null
@@ -1239,7 +1293,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           ip_address?: unknown | null
+          metadata?: Json | null
+          new_data?: Json | null
           new_values?: Json | null
+          old_data?: Json | null
           old_values?: Json | null
           record_id?: string | null
           table_name?: string | null
@@ -1251,7 +1308,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           ip_address?: unknown | null
+          metadata?: Json | null
+          new_data?: Json | null
           new_values?: Json | null
+          old_data?: Json | null
           old_values?: Json | null
           record_id?: string | null
           table_name?: string | null
@@ -1306,28 +1366,37 @@ export type Database = {
         Row: {
           created_at: string | null
           credits_balance: number | null
+          credits_purchased: number | null
+          credits_remaining: number | null
           credits_used: number | null
           id: string
           last_updated: string | null
           service_type: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
           credits_balance?: number | null
+          credits_purchased?: number | null
+          credits_remaining?: number | null
           credits_used?: number | null
           id?: string
           last_updated?: string | null
           service_type: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
           credits_balance?: number | null
+          credits_purchased?: number | null
+          credits_remaining?: number | null
           credits_used?: number | null
           id?: string
           last_updated?: string | null
           service_type?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -1554,6 +1623,45 @@ export type Database = {
           two_factor_enabled?: boolean | null
           two_factor_secret?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      workflows: {
+        Row: {
+          actions: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          trigger_config: Json | null
+          trigger_type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          actions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          trigger_config?: Json | null
+          trigger_type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          actions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          trigger_config?: Json | null
+          trigger_type?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }

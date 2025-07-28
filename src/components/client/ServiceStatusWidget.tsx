@@ -51,7 +51,7 @@ export function ServiceStatusWidget() {
     activatedServices.some((s) => s.service_id === serviceId);
 
   const isServicePending = (serviceId: string) =>
-    pendingRequests.some((r) => r.service_id === serviceId);
+    pendingRequests.some((r) => r.service_id?.toString() === serviceId);
 
   const handleRequestAccess = async (serviceId: string) => {
     setPendingServiceId(serviceId);
@@ -132,8 +132,8 @@ export function ServiceStatusWidget() {
                       <div className="font-medium">{service.service_name} {service.is_premium && <Crown className="w-4 h-4 text-yellow-500 inline-block ml-1" />}</div>
                       <div className="text-xs text-gray-500 capitalize mb-1">{service.service_type}</div>
                       <div className="flex gap-2 text-xs">
-                        <Badge variant="outline">Setup: {formatCurrency(service.setup_fee)}</Badge>
-                        <Badge variant="outline">Monthly: {formatCurrency(service.monthly_fee)}</Badge>
+                        <Badge variant="outline">Setup: {formatCurrency(service.setup_fee || 0)}</Badge>
+                        <Badge variant="outline">Monthly: {formatCurrency(service.monthly_fee || 0)}</Badge>
                       </div>
                     </div>
                   </div>

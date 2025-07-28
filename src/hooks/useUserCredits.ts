@@ -17,14 +17,32 @@ export const useUserCredits = () => {
 
   const { data: credits, isLoading, error } = useQuery({
     queryKey: ['user-credits'],
-    queryFn: async (): Promise<UserCredits> => {
+    queryFn: async (): Promise<UserCredits | null> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
       const { data, error } = await supabase
         .from('user_credits')
         .select('*')
-        .single();
+        .eq('user_id', user.id)
+        .eq('service_type', 'sms')
+        .maybeSingle();
 
       if (error) throw error;
-      return data;
+      
+      // Transform to match expected interface
+      if (data) {
+        return {
+          id: data.id,
+          user_id: data.user_id,
+          credits_remaining: data.credits_remaining || data.credits_balance || 0,
+          credits_purchased: data.credits_purchased || data.credits_balance || 0,
+          created_at: data.created_at,
+          updated_at: data.updated_at || data.last_updated
+        };
+      }
+      
+      return null;
     },
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
