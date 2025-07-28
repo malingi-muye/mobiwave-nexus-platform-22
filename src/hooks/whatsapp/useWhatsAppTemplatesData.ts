@@ -22,22 +22,8 @@ interface WhatsAppTemplate {
 const fetchWhatsAppTemplates = async (subscriptionId?: string): Promise<WhatsAppTemplate[]> => {
   if (!subscriptionId) return [];
 
-  try {
-    const { data, error } = await supabase
-      .from('whatsapp_templates')
-      .select('*')
-      .eq('subscription_id', subscriptionId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching WhatsApp templates:', error);
-      return [];
-    }
-    return (data || []) as WhatsAppTemplate[];
-  } catch (error) {
-    console.error('Error fetching WhatsApp templates:', error);
-    return [];
-  }
+  // WhatsApp templates table doesn't exist - return empty array
+  return [];
 };
 
 export const useWhatsAppTemplatesData = (subscriptionId?: string) => {

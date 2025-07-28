@@ -39,9 +39,7 @@ export const testApiCredentialsSave = async (userId: string) => {
     const testData = {
       user_id: userId,
       service_name: 'test_service',
-      additional_config: {
-        test: 'data'
-      },
+      api_key_encrypted: 'test-encrypted-key',
       is_active: true
     };
 

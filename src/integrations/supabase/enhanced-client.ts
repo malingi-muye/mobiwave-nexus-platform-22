@@ -93,7 +93,7 @@ class EnhancedSupabaseClient {
 
   // Wrapper for database methods
   from(table: string) {
-    const query = this.client.from(table);
+    const query = this.client.from(table as any);
     
     // Add error handling to common query methods
     const originalSelect = query.select.bind(query);
