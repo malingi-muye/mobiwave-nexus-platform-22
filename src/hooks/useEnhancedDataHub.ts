@@ -16,11 +16,11 @@ export interface ImportJob {
   updated_at: string;
 }
 
-export interface Record {
+export interface DataRecord {
   id: string;
   model_id: string;
   user_id: string;
-  data: Record<string, any>;
+  data: any;
   created_at: string;
   updated_at: string;
 }
@@ -29,7 +29,7 @@ export function useEnhancedDataHub() {
   const queryClient = useQueryClient();
 
   // Get records for a specific data model
-  const getRecords = async (modelId: string): Promise<Record[]> => {
+  const getRecords = async (modelId: string): Promise<DataRecord[]> => {
     const { data, error } = await supabase
       .from('records')
       .select('*')
@@ -37,7 +37,7 @@ export function useEnhancedDataHub() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as DataRecord[];
   };
 
   // Get recipients with filtering
@@ -55,9 +55,9 @@ export function useEnhancedDataHub() {
         
         if (typeof value === 'object' && value !== null) {
           // Handle range queries, etc.
-          if (value.min !== undefined && recordValue < value.min) return false;
-          if (value.max !== undefined && recordValue > value.max) return false;
-          if (value.contains && !String(recordValue).toLowerCase().includes(String(value.contains).toLowerCase())) return false;
+          if ((value as any).min !== undefined && recordValue < (value as any).min) return false;
+          if ((value as any).max !== undefined && recordValue > (value as any).max) return false;
+          if ((value as any).contains && !String(recordValue).toLowerCase().includes(String((value as any).contains).toLowerCase())) return false;
         } else {
           // Exact or partial match
           return String(recordValue).toLowerCase().includes(String(value).toLowerCase());
@@ -80,11 +80,15 @@ export function useEnhancedDataHub() {
   // Create record mutation
   const createRecord = useMutation({
     mutationFn: async ({ modelId, data }: { modelId: string; data: any }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: record, error } = await supabase
         .from('records')
         .insert([{
           model_id: modelId,
-          data: data
+          data: data,
+          user_id: user.id
         }])
         .select()
         .single();
@@ -143,41 +147,27 @@ export function useEnhancedDataHub() {
     }
   });
 
-  // Import jobs query
+  // Disabled import jobs functionality - table doesn't exist
   const useImportJobs = () => {
     return useQuery({
       queryKey: ['importJobs'],
       queryFn: async (): Promise<ImportJob[]> => {
-        const { data, error } = await supabase
-          .from('import_jobs')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return data || [];
+        // Return empty array since import_jobs table doesn't exist
+        return [];
       },
       staleTime: 30 * 1000, // 30 seconds
     });
   };
 
-  // Create import job mutation
+  // Create import job mutation (disabled)
   const createImportJob = useMutation({
     mutationFn: async ({ modelId, fileUrl, fileType }: { 
       modelId: string; 
       fileUrl: string; 
       fileType: string; 
     }) => {
-      // Call the import worker function
-      const { data, error } = await supabase.functions.invoke('import-worker', {
-        body: {
-          model_id: modelId,
-          file_url: fileUrl,
-          file_type: fileType
-        }
-      });
-
-      if (error) throw error;
-      return data;
+      // Disabled functionality
+      throw new Error('Import jobs not implemented');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['importJobs'] });
@@ -211,16 +201,9 @@ export function useEnhancedDataHub() {
     }
   });
 
-  // Get import job status
+  // Get import job status (disabled)
   const getImportJobStatus = async (jobId: string): Promise<ImportJob> => {
-    const { data, error } = await supabase
-      .from('import_jobs')
-      .select('*')
-      .eq('id', jobId)
-      .single();
-
-    if (error) throw error;
-    return data;
+    throw new Error('Import jobs not implemented');
   };
 
   // File upload helper

@@ -30,7 +30,8 @@ interface CreateContactData {
   phone: string;
   tags?: string[];
   is_active?: boolean;
-  custom_fields?: any;
+  metadata?: any;
+  user_id: string;
 }
 
 export const useContacts = () => {
@@ -52,10 +53,18 @@ export const useContacts = () => {
   });
 
   const createContact = useMutation({
-    mutationFn: async (contactData: CreateContactData) => {
+    mutationFn: async (contactData: Omit<CreateContactData, 'user_id'>) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const fullContactData = {
+        ...contactData,
+        user_id: user.id
+      };
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert([contactData])
+        .insert([fullContactData])
         .select()
         .single();
 
@@ -102,11 +111,17 @@ export const useContacts = () => {
   });
 
   const importContacts = useMutation({
-    mutationFn: async (contactsData: CreateContactData[]) => {
-      // Ensure all contacts have required fields
-      const validContacts = contactsData.filter(contact => 
-        contact.phone && contact.first_name && contact.last_name
-      );
+    mutationFn: async (contactsData: Omit<CreateContactData, 'user_id'>[]) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Ensure all contacts have required fields and add user_id
+      const validContacts = contactsData
+        .filter(contact => contact.phone && contact.first_name && contact.last_name)
+        .map(contact => ({
+          ...contact,
+          user_id: user.id
+        }));
 
       const { data, error } = await supabase
         .from('contacts')

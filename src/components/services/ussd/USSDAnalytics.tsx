@@ -21,7 +21,7 @@ export function USSDAnalytics({ applicationId, timeRange = '7d' }: USSDAnalytics
       const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
       try {
-        let query = supabase
+        let query: any = supabase
           .from('ussd_sessions')
           .select('*')
           .gte('created_at', startDate.toISOString());

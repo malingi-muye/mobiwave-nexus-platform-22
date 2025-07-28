@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface DeliveryStatus {
   messageId: string;
   recipient: string;
-  status: number;
+  status: string;
   statusDescription: string;
 }
 

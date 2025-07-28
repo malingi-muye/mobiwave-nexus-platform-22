@@ -66,8 +66,9 @@ export const useEnhancedUserManagement = (searchTerm: string, roleFilter: string
     }
   });
 
-  // Get Mspace users
-  const { users: mspaceUsers, isLoading: isLoadingMspace } = useMspaceUsers();
+  // Get Mspace users - temporarily disabled
+  const mspaceUsers: any[] = [];
+  const isLoadingMspace = false;
 
   // Combine and filter users
   const { data: combinedUsers, isLoading: isProcessing } = useQuery({

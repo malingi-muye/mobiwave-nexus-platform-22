@@ -37,7 +37,12 @@ const fetchDataModels = async (): Promise<DataModel[]> => {
   if (error) {
     throw new Error(error.message);
   }
-  return data || [];
+  
+  // Transform data to include fields from schema
+  return (data || []).map(model => ({
+    ...model,
+    fields: Array.isArray(model.schema) ? model.schema as DataModelField[] : []
+  }));
 };
 
 // Create a new data model
@@ -52,6 +57,7 @@ const createDataModel = async (modelData: NewDataModel): Promise<DataModel> => {
     .from(TABLE_NAME)
     .insert([{
       ...modelData,
+      schema: modelData.fields || [],
       user_id: user.id
     }])
     .select()
@@ -60,14 +66,27 @@ const createDataModel = async (modelData: NewDataModel): Promise<DataModel> => {
   if (error) {
     throw new Error(error.message);
   }
-  return data;
+  
+  // Transform data to include fields from schema
+  return {
+    ...data,
+    fields: Array.isArray(data.schema) ? data.schema as DataModelField[] : []
+  };
 };
 
 // Update a data model
 const updateDataModel = async (modelId: string, updates: Partial<DataModel>): Promise<DataModel> => {
+  const updateData: any = { ...updates };
+  
+  // If fields are being updated, store them in schema
+  if (updates.fields) {
+    updateData.schema = updates.fields;
+    delete updateData.fields;
+  }
+  
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .update(updates)
+    .update(updateData)
     .eq('id', modelId)
     .select()
     .single();
@@ -75,7 +94,12 @@ const updateDataModel = async (modelId: string, updates: Partial<DataModel>): Pr
   if (error) {
     throw new Error(error.message);
   }
-  return data;
+  
+  // Transform data to include fields from schema
+  return {
+    ...data,
+    fields: Array.isArray(data.schema) ? data.schema as DataModelField[] : []
+  };
 };
 
 // Delete a data model
