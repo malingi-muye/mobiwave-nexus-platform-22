@@ -15,6 +15,8 @@ export interface BulkSMSData {
   senderId?: string;
   scheduledFor?: string;
   campaignName?: string;
+  scheduleConfig?: any;
+  metadata?: any;
 }
 
 export const useUnifiedSMSService = () => {
