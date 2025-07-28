@@ -111,14 +111,21 @@ serve(async (req) => {
       throw new Error('No credentials available')
     }
 
-    // Try different API endpoints based on the test script findings
+    // Try different API endpoints and methods based on the test script findings
     let url = ''
+    let method = 'GET'
+    let body: any = null
     let responseData: any = null
 
     switch (operation) {
       case 'balance':
-        // Try the newer API endpoint first
-        url = `https://api.mspace.co.ke/smsapi/v2/balance?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
+        // Try POST with JSON body first, then GET as fallback
+        url = `https://api.mspace.co.ke/smsapi/v2/balance`
+        method = 'POST'
+        body = JSON.stringify({ 
+          apikey: mspaceCredentials.password, 
+          username: mspaceCredentials.username 
+        })
         break
 
       case 'sendSMS':
@@ -136,8 +143,13 @@ serve(async (req) => {
         break
 
       case 'resellerClients':
-        // Try the newer API endpoint
-        url = `https://api.mspace.co.ke/smsapi/v2/resellerclients?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
+        // Try POST with JSON body first
+        url = `https://api.mspace.co.ke/smsapi/v2/resellerclients`
+        method = 'POST'
+        body = JSON.stringify({ 
+          apikey: mspaceCredentials.password, 
+          username: mspaceCredentials.username 
+        })
         break
 
       case 'topUpReseller':
@@ -155,8 +167,13 @@ serve(async (req) => {
         break
 
       case 'login':
-        // Try the balance endpoint for login test since there's no dedicated login endpoint
-        url = `https://api.mspace.co.ke/smsapi/v2/balance?apikey=${mspaceCredentials.password}&username=${mspaceCredentials.username}`
+        // Try POST with JSON body for login test
+        url = `https://api.mspace.co.ke/smsapi/v2/balance`
+        method = 'POST'
+        body = JSON.stringify({ 
+          apikey: mspaceCredentials.password, 
+          username: mspaceCredentials.username 
+        })
         break
 
       default:
@@ -166,15 +183,21 @@ serve(async (req) => {
     console.log(`Making Mspace API call: ${operation}`)
     console.log(`URL: ${url.replace(mspaceCredentials.password, '[HIDDEN]')}`)
 
-    // Make the API call to Mspace
-    const mspaceResponse = await fetch(url, {
-      method: 'GET',
+    // Make the API call to Mspace with dynamic method and body
+    const fetchOptions: any = {
+      method: method,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'User-Agent': 'MobiWave-SMS-Service/1.0'
       }
-    })
+    }
+
+    if (body) {
+      fetchOptions.body = body
+    }
+
+    const mspaceResponse = await fetch(url, fetchOptions)
 
     const responseText = await mspaceResponse.text()
     console.log(`Mspace API response status: ${mspaceResponse.status}`)
