@@ -100,12 +100,16 @@ serve(async (req) => {
         throw new Error('Mspace credentials not found. Please configure your credentials first.')
       }
 
-      // For now, treat api_key_encrypted as the actual API key
-      // This handles the case where credentials are stored without encryption
+      // Use the api_key_encrypted as the password for Mspace API
       mspaceCredentials = {
         username: dbCredentials.username,
         password: dbCredentials.api_key_encrypted,
         senderId: dbCredentials.sender_id || 'MSPACE'
+      }
+
+      // Validate that we have a proper API key (should be 128 characters)
+      if (!mspaceCredentials.password || mspaceCredentials.password.length !== 128) {
+        throw new Error(`Invalid Mspace API key format. Expected 128 characters, got ${mspaceCredentials.password?.length || 0}`)
       }
     }
 
