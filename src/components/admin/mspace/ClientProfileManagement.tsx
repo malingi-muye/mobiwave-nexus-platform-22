@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Users, 
   Plus, 
@@ -12,9 +13,11 @@ import {
   Eye,
   EyeOff,
   Key,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { useClientProfiles } from '@/hooks/useClientProfiles';
+import { useMspaceApi } from '@/hooks/useMspaceApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -31,9 +34,16 @@ export function ClientProfileManagement() {
     isDeleting
   } = useClientProfiles();
 
+  const { 
+    resellerClients, 
+    isLoadingResellerClients, 
+    refreshResellerClients 
+  } = useMspaceApi();
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<any>(null);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [selectedResellerClient, setSelectedResellerClient] = useState<string>('');
   const [formData, setFormData] = useState({
     client_name: '',
     username: '',
@@ -42,6 +52,20 @@ export function ClientProfileManagement() {
     phone: '',
     sms_balance: 0
   });
+
+  // Update form data when reseller client is selected
+  useEffect(() => {
+    if (selectedResellerClient) {
+      const client = resellerClients.find(c => c.clientname === selectedResellerClient);
+      if (client) {
+        setFormData(prev => ({
+          ...prev,
+          username: client.clientname,
+          sms_balance: parseInt(client.smsBalance || '0')
+        }));
+      }
+    }
+  }, [selectedResellerClient, resellerClients]);
 
   const handleCreateProfile = async () => {
     if (!formData.client_name || !formData.username || !formData.password) {
@@ -59,6 +83,7 @@ export function ClientProfileManagement() {
         phone: '',
         sms_balance: 0
       });
+      setSelectedResellerClient('');
       setIsCreateDialogOpen(false);
     } catch (error: any) {
       toast.error(error.message || 'Failed to create client profile');
@@ -96,7 +121,7 @@ export function ClientProfileManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-2xl font-bold">Client Profile Management</h3>
-          <p className="text-gray-600">Create and manage client profiles for dashboard access</p>
+          <p className="text-gray-600">Create and manage client profiles for dashboard access using existing Mspace reseller clients</p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -109,26 +134,57 @@ export function ClientProfileManagement() {
             <DialogHeader>
               <DialogTitle>Create New Client Profile</DialogTitle>
               <DialogDescription>
-                Create a client profile with login credentials for dashboard access
+                Create a client profile with login credentials for dashboard access using an existing Mspace reseller client
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="client_name">Client Name *</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="reseller_client">Select Reseller Client *</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={refreshResellerClients}
+                    disabled={isLoadingResellerClients}
+                    className="h-auto p-1"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isLoadingResellerClients ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+                <Select 
+                  value={selectedResellerClient} 
+                  onValueChange={setSelectedResellerClient}
+                  disabled={isLoadingResellerClients}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingResellerClients ? "Loading reseller clients..." : "Select a reseller client"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resellerClients.map((client) => (
+                      <SelectItem key={client.clientname} value={client.clientname}>
+                        {client.clientname} (Balance: {client.smsBalance || '0'} SMS)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client_name">Display Name *</Label>
                 <Input
                   id="client_name"
                   value={formData.client_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
-                  placeholder="Enter client name"
+                  placeholder="Enter display name for the client"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">Username *</Label>
+                <Label htmlFor="username">Username (Auto-filled)</Label>
                 <Input
                   id="username"
                   value={formData.username}
-                  onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-                  placeholder="Enter username for login"
+                  readOnly
+                  className="bg-gray-50"
+                  placeholder="Select a reseller client first"
                 />
               </div>
               <div className="space-y-2">
@@ -161,19 +217,20 @@ export function ClientProfileManagement() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sms_balance">Initial SMS Balance</Label>
+                <Label htmlFor="sms_balance">Current SMS Balance (Auto-filled)</Label>
                 <Input
                   id="sms_balance"
                   type="number"
                   value={formData.sms_balance}
-                  onChange={(e) => setFormData(prev => ({ ...prev, sms_balance: parseInt(e.target.value) || 0 }))}
-                  placeholder="0"
+                  readOnly
+                  className="bg-gray-50"
+                  placeholder="Select a reseller client first"
                 />
               </div>
               <div className="flex gap-2 pt-4">
                 <Button 
                   onClick={handleCreateProfile}
-                  disabled={isCreating}
+                  disabled={isCreating || !selectedResellerClient}
                   className="flex-1"
                 >
                   {isCreating ? 'Creating...' : 'Create Profile'}
