@@ -64,14 +64,14 @@ export const useCompleteUserManagement = (searchTerm: string, roleFilter: string
           
           if (session) {
             // Use the correct Edge Function URL format
-            const functionUrl = `https://bhnjecmsalnqxgociwuk.supabase.co/functions/v1/admin-users`;
+            const functionUrl = `https://axkvnjozueyhjdmmbjgg.supabase.co/functions/v1/admin-users`;
             
             const response = await fetch(functionUrl, {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${session.access_token}`,
                 'Content-Type': 'application/json',
-                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJobmplY21zYWxucXhnb2Npd3VrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4MjA0MjcsImV4cCI6MjA2MjM5NjQyN30.5pAIzKeSeIR3zC8DnccQBTh8hQuhU09NCgH4H8xnMt8'
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF4a3Zuam96dWV5aGpkbW1iamdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNzU0MTgsImV4cCI6MjA2ODk1MTQxOH0.S9BzFd4Ks9TjpmtdzzCqWKsN5uxcIl1CO71ebShahvA'
               }
             });
 

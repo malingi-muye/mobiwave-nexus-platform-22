@@ -14,7 +14,7 @@ export const checkSupabaseConnectivity = async (): Promise<boolean> => {
   
   try {
     // Simple connectivity check to Supabase
-    const response = await fetch('https://bhnjecmsalnqxgociwuk.supabase.co/rest/v1/', {
+    const response = await fetch('https://axkvnjozueyhjdmmbjgg.supabase.co/rest/v1/', {
       method: 'HEAD',
       signal: AbortSignal.timeout(5000) // 5 second timeout
     });
