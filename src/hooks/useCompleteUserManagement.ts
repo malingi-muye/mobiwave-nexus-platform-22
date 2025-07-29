@@ -127,8 +127,8 @@ export const useCompleteUserManagement = (searchTerm: string, roleFilter: string
               created_at: authUser.created_at,
               email_confirmed_at: authUser.email_confirmed_at,
               last_sign_in_at: authUser.last_sign_in_at,
-              credits_remaining: userCredits?.credits_remaining || userCredits?.balance || 0,
-              credits_purchased: userCredits?.credits_purchased || userCredits?.total_purchased || 0,
+              credits_remaining: userCredits?.credits_remaining || 0,
+              credits_purchased: userCredits?.credits_purchased || 0,
               has_profile: !!profile,
               raw_user_meta_data: authUser.user_metadata
             };
@@ -148,8 +148,8 @@ export const useCompleteUserManagement = (searchTerm: string, roleFilter: string
               created_at: profile.created_at,
               email_confirmed_at: undefined, // Not available without auth data
               last_sign_in_at: undefined,
-              credits_remaining: userCredits?.credits_remaining || userCredits?.balance || 0,
-              credits_purchased: userCredits?.credits_purchased || userCredits?.total_purchased || 0,
+              credits_remaining: userCredits?.credits_remaining || 0,
+              credits_purchased: userCredits?.credits_purchased || 0,
               has_profile: true,
               raw_user_meta_data: {}
             };

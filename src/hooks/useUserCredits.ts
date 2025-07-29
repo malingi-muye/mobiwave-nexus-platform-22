@@ -33,13 +33,7 @@ export const useUserCredits = () => {
       if (error) throw error;
       
       if (data) {
-        // Transform to include backward compatibility fields
-        return {
-          ...data,
-          credits: data.credits_balance || data.balance || 0,
-          credits_remaining: data.credits_remaining || data.credits_balance || data.balance || 0,
-          credits_purchased: data.credits_purchased || data.total_purchased || 0
-        };
+        return data;
       }
       
       return null;
@@ -56,7 +50,9 @@ export const useUserCredits = () => {
       const { data, error } = await supabase
         .from('user_credits')
         .update({
-          credits_balance: (credits?.credits || 0) + amount,
+          credits: (credits?.credits || 0) + amount,
+          credits_remaining: (credits?.credits_remaining || 0) + amount,
+          credits_purchased: (credits?.credits_purchased || 0) + amount,
           updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)

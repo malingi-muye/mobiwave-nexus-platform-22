@@ -1861,45 +1861,33 @@ export type Database = {
       }
       user_credits: {
         Row: {
-          balance: number | null
-          created_at: string | null
-          credits_balance: number | null
-          credits_purchased: number | null
-          credits_remaining: number | null
-          credits_used: number | null
+          created_at: string
+          credits: number
+          credits_purchased: number
+          credits_remaining: number
           id: string
-          last_updated: string | null
           service_type: string
-          total_purchased: number | null
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          balance?: number | null
-          created_at?: string | null
-          credits_balance?: number | null
-          credits_purchased?: number | null
-          credits_remaining?: number | null
-          credits_used?: number | null
+          created_at?: string
+          credits?: number
+          credits_purchased?: number
+          credits_remaining?: number
           id?: string
-          last_updated?: string | null
           service_type: string
-          total_purchased?: number | null
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          balance?: number | null
-          created_at?: string | null
-          credits_balance?: number | null
-          credits_purchased?: number | null
-          credits_remaining?: number | null
-          credits_used?: number | null
+          created_at?: string
+          credits?: number
+          credits_purchased?: number
+          credits_remaining?: number
           id?: string
-          last_updated?: string | null
           service_type?: string
-          total_purchased?: number | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
