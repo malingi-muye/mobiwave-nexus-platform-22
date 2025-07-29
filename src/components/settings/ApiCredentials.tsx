@@ -155,21 +155,19 @@ export function ApiCredentials() {
   };
 
   const testConnection = async () => {
-    if (!credentials.username || !credentials.api_key) {
-      toast.error('Please provide both username and API key');
+    if (!credentials.username) {
+      toast.error('Please save your credentials first');
       return;
     }
 
     setIsTestingConnection(true);
     try {
       // Test the credentials by calling the login endpoint
+      // Let the edge function fetch credentials from database
       const { data, error } = await supabase.functions.invoke('mspace-api', {
         body: {
-          operation: 'login',
-          credentials: {
-            username: credentials.username,
-            password: credentials.api_key
-          }
+          operation: 'login'
+          // No credentials passed - edge function will fetch from database
         }
       });
 
@@ -313,7 +311,7 @@ export function ApiCredentials() {
           <Button 
             variant="outline" 
             onClick={testConnection}
-            disabled={isTestingConnection || !credentials.api_key || !credentials.username}
+            disabled={isTestingConnection || !credentials.username}
           >
             {isTestingConnection ? 'Testing...' : 'Test Connection'}
           </Button>
