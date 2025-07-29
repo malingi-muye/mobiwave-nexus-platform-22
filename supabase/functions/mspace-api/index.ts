@@ -88,22 +88,44 @@ serve(async (req) => {
     // Get credentials from database if not provided
     let mspaceCredentials = credentials;
     if (!mspaceCredentials) {
-      const { data: dbCredentials, error: credError } = await supabaseClient
-        .from('api_credentials')
-        .select('api_key_encrypted, username, sender_id')
-        .eq('user_id', user.id)
-        .eq('service_name', 'mspace')
-        .eq('is_active', true)
-        .single()
+      // First try to get decrypted credentials
+      try {
+        const decryptResponse = await supabaseClient.functions.invoke('decrypt-credentials', {
+          headers: {
+            'Authorization': authHeader
+          }
+        });
 
-      if (credError || !dbCredentials) {
-        throw new Error('Mspace credentials not found. Please configure your credentials first.')
-      }
+        if (decryptResponse.data && !decryptResponse.error) {
+          mspaceCredentials = {
+            username: decryptResponse.data.username,
+            password: decryptResponse.data.apiKey,
+            senderId: decryptResponse.data.senderId || 'MSPACE'
+          }
+        } else {
+          throw new Error('Failed to decrypt credentials')
+        }
+      } catch (decryptError) {
+        console.log('Decryption failed, falling back to plain text credentials:', decryptError)
+        
+        // Fallback to plain text credentials
+        const { data: dbCredentials, error: credError } = await supabaseClient
+          .from('api_credentials')
+          .select('api_key_encrypted, username, sender_id')
+          .eq('user_id', user.id)
+          .eq('service_name', 'mspace')
+          .eq('is_active', true)
+          .single()
 
-      mspaceCredentials = {
-        username: dbCredentials.username,
-        password: dbCredentials.api_key_encrypted, // Using api_key_encrypted as password
-        senderId: dbCredentials.sender_id || 'MSPACE'
+        if (credError || !dbCredentials) {
+          throw new Error('Mspace credentials not found. Please configure your credentials first.')
+        }
+
+        mspaceCredentials = {
+          username: dbCredentials.username,
+          password: dbCredentials.api_key_encrypted, // Using stored value as fallback
+          senderId: dbCredentials.sender_id || 'MSPACE'
+        }
       }
     }
 
