@@ -117,17 +117,20 @@ serve(async (req) => {
       throw new Error('No credentials available')
     }
 
-    // Try different API endpoints and methods based on the test script findings
+    // Use the correct Mspace API v2 endpoints based on official documentation
     let url = ''
-    let method = 'GET'
+    let method = 'POST'
     let body: any = null
     let responseData: any = null
 
     switch (operation) {
       case 'balance':
-        // Use GET request with URL parameters for balance
-        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/balance/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
-        method = 'GET'
+        // Use the v2 API with POST request and apikey header
+        url = `https://api.mspace.co.ke/smsapi/v2/balance`
+        method = 'POST'
+        body = JSON.stringify({ 
+          username: mspaceCredentials.username 
+        })
         break
 
       case 'sendSMS':
@@ -135,41 +138,55 @@ serve(async (req) => {
           throw new Error('Recipient and message are required for SMS sending')
         }
         const senderIdParam = senderId || mspaceCredentials.senderId || 'MSPACE'
-        const encodedMessage = encodeURIComponent(message)
-        const encodedRecipient = encodeURIComponent(recipient)
-        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/sendtext/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/senderid=${senderIdParam}/recipient=${encodedRecipient}/message=${encodedMessage}`
+        url = `https://api.mspace.co.ke/smsapi/v2/sendtext`
+        method = 'POST'
+        body = JSON.stringify({
+          username: mspaceCredentials.username,
+          senderId: senderIdParam,
+          recipient: recipient,
+          message: message
+        })
         break
 
       case 'subUsers':
-        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/subusers/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        url = `https://api.mspace.co.ke/smsapi/v2/subusers`
+        method = 'POST'
+        body = JSON.stringify({ 
+          username: mspaceCredentials.username 
+        })
         break
 
       case 'resellerClients':
-        // Use GET request with URL parameters for reseller clients
-        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/resellerclients/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
-        method = 'GET'
+        url = `https://api.mspace.co.ke/smsapi/v2/resellerclients`
+        method = 'POST'
+        body = JSON.stringify({ 
+          username: mspaceCredentials.username 
+        })
         break
 
       case 'topUpReseller':
         if (!clientname || !noofsms) {
           throw new Error('Client name and number of SMS are required for reseller top-up')
         }
+        // Note: This endpoint might not be available in v2 API, keeping old format for now
         url = `https://api.mspace.co.ke/mspaceservice/wr/sms/resellerclienttopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/clientname=${clientname}/noofsms=${noofsms}`
+        method = 'GET'
         break
 
       case 'topUpSub':
         if (!subaccname || !noofsms) {
           throw new Error('Sub account name and number of SMS are required for sub account top-up')
         }
+        // Note: This endpoint might not be available in v2 API, keeping old format for now
         url = `https://api.mspace.co.ke/mspaceservice/wr/sms/subacctopup/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}/subaccname=${subaccname}/noofsms=${noofsms}`
+        method = 'GET'
         break
 
       case 'login':
-        // Try POST with JSON body for login test
+        // Test credentials using balance endpoint
         url = `https://api.mspace.co.ke/smsapi/v2/balance`
         method = 'POST'
         body = JSON.stringify({ 
-          apikey: mspaceCredentials.password, 
           username: mspaceCredentials.username 
         })
         break
@@ -183,16 +200,21 @@ serve(async (req) => {
     console.log(`Username: ${mspaceCredentials.username}`)
     console.log(`API Key length: ${mspaceCredentials.password?.length || 0}`)
 
-    // Make the API call to Mspace with proper headers
+    // Make the API call to Mspace with proper headers based on v2 API documentation
     const fetchOptions: any = {
       method: method,
       headers: {
-        'Accept': 'text/plain, */*',
+        'apikey': mspaceCredentials.password, // API key goes in header for v2 API
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'User-Agent': 'MobiWave-SMS-Service/1.0'
       }
     }
 
-    if (body) {
+    // For GET requests (legacy endpoints), don't include Content-Type and body
+    if (method === 'GET') {
+      delete fetchOptions.headers['Content-Type']
+    } else if (body) {
       fetchOptions.body = body
     }
 
