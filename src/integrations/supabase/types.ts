@@ -588,6 +588,54 @@ export type Database = {
           },
         ]
       }
+      client_profiles: {
+        Row: {
+          client_name: string
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          last_login: string | null
+          metadata: Json | null
+          password_hash: string
+          phone: string | null
+          sms_balance: number | null
+          updated_at: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          metadata?: Json | null
+          password_hash: string
+          phone?: string | null
+          sms_balance?: number | null
+          updated_at?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login?: string | null
+          metadata?: Json | null
+          password_hash?: string
+          phone?: string | null
+          sms_balance?: number | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       contact_group_members: {
         Row: {
           added_at: string | null
@@ -735,6 +783,77 @@ export type Database = {
         }
         Relationships: []
       }
+      data_hub_models: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          fields: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          fields?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          fields?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      data_hub_records: {
+        Row: {
+          created_at: string | null
+          data: Json
+          id: string
+          is_active: boolean | null
+          model_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json
+          id?: string
+          is_active?: boolean | null
+          model_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          id?: string
+          is_active?: boolean | null
+          model_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_hub_records_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "data_hub_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data_models: {
         Row: {
           created_at: string | null
@@ -815,6 +934,65 @@ export type Database = {
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          file_size: number | null
+          filename: string
+          id: string
+          model_id: string
+          processed_records: number | null
+          progress: number | null
+          started_at: string | null
+          status: string | null
+          total_records: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          file_size?: number | null
+          filename: string
+          id?: string
+          model_id: string
+          processed_records?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string | null
+          total_records?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          file_size?: number | null
+          filename?: string
+          id?: string
+          model_id?: string
+          processed_records?: number | null
+          progress?: number | null
+          started_at?: string | null
+          status?: string | null
+          total_records?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "data_hub_models"
             referencedColumns: ["id"]
           },
         ]

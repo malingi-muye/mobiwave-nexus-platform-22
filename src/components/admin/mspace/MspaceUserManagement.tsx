@@ -20,6 +20,7 @@ import {
 import { useMspaceApi } from '@/hooks/useMspaceApi';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CredentialsStatusAlert } from '@/components/common/CredentialsStatusAlert';
+import { ClientProfileManagement } from './ClientProfileManagement';
 
 export function MspaceUserManagement() {
   const {
@@ -340,45 +341,58 @@ export function MspaceUserManagement() {
         </TabsContent>
 
         <TabsContent value="resellers" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="w-5 h-5" />
-                Reseller Clients
-              </CardTitle>
-              <CardDescription>Manage your reseller clients and their balances</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoadingResellerClients ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="animate-pulse flex items-center justify-between p-3 border rounded">
-                      <div className="h-4 bg-gray-200 rounded w-32"></div>
-                      <div className="h-4 bg-gray-200 rounded w-20"></div>
+          <Tabs defaultValue="api-clients" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="api-clients">API Clients</TabsTrigger>
+              <TabsTrigger value="profiles">Client Profiles</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="api-clients">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5" />
+                    Reseller Clients (API)
+                  </CardTitle>
+                  <CardDescription>Manage your reseller clients and their balances from Mspace API</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingResellerClients ? (
+                    <div className="space-y-3">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="animate-pulse flex items-center justify-between p-3 border rounded">
+                          <div className="h-4 bg-gray-200 rounded w-32"></div>
+                          <div className="h-4 bg-gray-200 rounded w-20"></div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : resellerClients.length > 0 ? (
-                <div className="space-y-3">
-                  {resellerClients.map((client, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Building2 className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium">{client.clientname}</span>
-                      </div>
-                      <Badge variant="outline">
-                        {client.smsBalance} SMS
-                      </Badge>
+                  ) : resellerClients.length > 0 ? (
+                    <div className="space-y-3">
+                      {resellerClients.map((client, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium">{(client as any).clientUserName || client.clientname}</span>
+                          </div>
+                          <Badge variant="outline">
+                            {client.smsBalance} SMS
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No reseller clients found
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No reseller clients found
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="profiles">
+              <ClientProfileManagement />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="topup" className="space-y-6">

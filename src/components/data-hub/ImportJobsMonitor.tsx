@@ -11,14 +11,13 @@ import {
   RefreshCw,
   FileText
 } from 'lucide-react';
-import { useEnhancedDataHub } from '@/hooks/useEnhancedDataHub';
-import { useDataModels } from '@/hooks/useDataModels';
+import { useDataHubImportJobs } from '@/hooks/useDataHubImportJobs';
+import { useDataHubModels } from '@/hooks/useDataHubModels';
 import { formatDistanceToNow } from 'date-fns';
 
 export function ImportJobsMonitor() {
-  const { useImportJobs } = useEnhancedDataHub();
-  const { dataModels } = useDataModels();
-  const { data: importJobs, isLoading, refetch } = useImportJobs();
+  const { importJobs, isLoading, refetch } = useDataHubImportJobs();
+  const { models } = useDataHubModels();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -51,7 +50,7 @@ export function ImportJobsMonitor() {
   };
 
   const getModelName = (modelId: string) => {
-    const model = dataModels?.find(m => m.id === modelId);
+    const model = models?.find(m => m.id === modelId);
     return model?.name || 'Unknown Model';
   };
 
@@ -108,7 +107,7 @@ export function ImportJobsMonitor() {
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>File: {job.file_url.split('/').pop()}</span>
+                    <span>File: {job.filename}</span>
                     <span>
                       {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
                     </span>

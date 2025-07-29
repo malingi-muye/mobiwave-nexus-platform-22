@@ -14,8 +14,8 @@ import {
   X,
   Download
 } from 'lucide-react';
-import { useDataModels } from '@/hooks/useDataModels';
-import { useEnhancedDataHub } from '@/hooks/useEnhancedDataHub';
+import { useDataHubModels } from '@/hooks/useDataHubModels';
+import { useDataHubImportJobs } from '@/hooks/useDataHubImportJobs';
 import { toast } from 'sonner';
 
 interface FileUploadProps {
@@ -29,8 +29,8 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
-  const { dataModels, isLoadingModels } = useDataModels();
-  const { uploadFile, createImportJob, isCreatingImportJob } = useEnhancedDataHub();
+  const { models, isLoading: isLoadingModels } = useDataHubModels();
+  const { createJob, isCreatingJob } = useDataHubImportJobs();
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -96,19 +96,15 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         });
       }, 200);
 
-      // Upload file to storage
-      const fileUrl = await uploadFile(selectedFile);
+      // Create import job
+      const job = await createJob.mutateAsync({
+        model_id: selectedModel,
+        filename: selectedFile.name,
+        file_size: selectedFile.size
+      });
       
       clearInterval(progressInterval);
       setUploadProgress(100);
-
-      // Create import job
-      const fileType = selectedFile.name.endsWith('.csv') ? 'csv' : 'json';
-      const job = await createImportJob.mutateAsync({
-        modelId: selectedModel,
-        fileUrl,
-        fileType
-      });
 
       toast.success('File uploaded successfully! Import job created.');
       
@@ -139,7 +135,7 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
       return;
     }
 
-    const model = dataModels?.find(m => m.id === selectedModel);
+    const model = models?.find(m => m.id === selectedModel);
     if (!model) return;
 
     // Create CSV template
@@ -184,8 +180,8 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
               <SelectContent>
                 {isLoadingModels ? (
                   <SelectItem value="" disabled>Loading models...</SelectItem>
-                ) : dataModels && dataModels.length > 0 ? (
-                  dataModels.map((model) => (
+                ) : models && models.length > 0 ? (
+                  models.map((model) => (
                     <SelectItem key={model.id} value={model.id}>
                       {model.name}
                     </SelectItem>
@@ -280,10 +276,10 @@ export function FileUpload({ onUploadComplete }: FileUploadProps) {
         {/* Upload Button */}
         <Button 
           onClick={handleUpload}
-          disabled={!selectedFile || !selectedModel || isUploading || isCreatingImportJob}
+          disabled={!selectedFile || !selectedModel || isUploading || isCreatingJob}
           className="w-full"
         >
-          {isUploading || isCreatingImportJob ? (
+          {isUploading || isCreatingJob ? (
             <>Uploading...</>
           ) : (
             <>
