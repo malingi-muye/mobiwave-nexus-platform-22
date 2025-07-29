@@ -121,13 +121,9 @@ serve(async (req) => {
 
     switch (operation) {
       case 'balance':
-        // Try POST with JSON body first, then GET as fallback
-        url = `https://api.mspace.co.ke/smsapi/v2/balance`
-        method = 'POST'
-        body = JSON.stringify({ 
-          apikey: mspaceCredentials.password, 
-          username: mspaceCredentials.username 
-        })
+        // Use GET request with URL parameters for balance
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/balance/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        method = 'GET'
         break
 
       case 'sendSMS':
@@ -145,13 +141,9 @@ serve(async (req) => {
         break
 
       case 'resellerClients':
-        // Try POST with JSON body first
-        url = `https://api.mspace.co.ke/smsapi/v2/resellerclients`
-        method = 'POST'
-        body = JSON.stringify({ 
-          apikey: mspaceCredentials.password, 
-          username: mspaceCredentials.username 
-        })
+        // Use GET request with URL parameters for reseller clients
+        url = `https://api.mspace.co.ke/mspaceservice/wr/sms/resellerclients/username=${mspaceCredentials.username}/password=${mspaceCredentials.password}`
+        method = 'GET'
         break
 
       case 'topUpReseller':
