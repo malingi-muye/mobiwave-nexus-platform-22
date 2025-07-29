@@ -88,44 +88,24 @@ serve(async (req) => {
     // Get credentials from database if not provided
     let mspaceCredentials = credentials;
     if (!mspaceCredentials) {
-      // First try to get decrypted credentials
-      try {
-        const decryptResponse = await supabaseClient.functions.invoke('decrypt-credentials', {
-          headers: {
-            'Authorization': authHeader
-          }
-        });
+      const { data: dbCredentials, error: credError } = await supabaseClient
+        .from('api_credentials')
+        .select('api_key_encrypted, username, sender_id')
+        .eq('user_id', user.id)
+        .eq('service_name', 'mspace')
+        .eq('is_active', true)
+        .single()
 
-        if (decryptResponse.data && !decryptResponse.error) {
-          mspaceCredentials = {
-            username: decryptResponse.data.username,
-            password: decryptResponse.data.apiKey,
-            senderId: decryptResponse.data.senderId || 'MSPACE'
-          }
-        } else {
-          throw new Error('Failed to decrypt credentials')
-        }
-      } catch (decryptError) {
-        console.log('Decryption failed, falling back to plain text credentials:', decryptError)
-        
-        // Fallback to plain text credentials
-        const { data: dbCredentials, error: credError } = await supabaseClient
-          .from('api_credentials')
-          .select('api_key_encrypted, username, sender_id')
-          .eq('user_id', user.id)
-          .eq('service_name', 'mspace')
-          .eq('is_active', true)
-          .single()
+      if (credError || !dbCredentials) {
+        throw new Error('Mspace credentials not found. Please configure your credentials first.')
+      }
 
-        if (credError || !dbCredentials) {
-          throw new Error('Mspace credentials not found. Please configure your credentials first.')
-        }
-
-        mspaceCredentials = {
-          username: dbCredentials.username,
-          password: dbCredentials.api_key_encrypted, // Using stored value as fallback
-          senderId: dbCredentials.sender_id || 'MSPACE'
-        }
+      // For now, treat api_key_encrypted as the actual API key
+      // This handles the case where credentials are stored without encryption
+      mspaceCredentials = {
+        username: dbCredentials.username,
+        password: dbCredentials.api_key_encrypted,
+        senderId: dbCredentials.sender_id || 'MSPACE'
       }
     }
 
@@ -204,6 +184,8 @@ serve(async (req) => {
 
     console.log(`Making Mspace API call: ${operation}`)
     console.log(`URL: ${url.replace(mspaceCredentials.password, '[HIDDEN]')}`)
+    console.log(`Username: ${mspaceCredentials.username}`)
+    console.log(`API Key length: ${mspaceCredentials.password?.length || 0}`)
 
     // Make the API call to Mspace with dynamic method and body
     const fetchOptions: any = {

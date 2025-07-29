@@ -31,12 +31,10 @@ export function MspaceUserManagement() {
     isLoadingBalance,
     isLoadingSubUsers,
     isLoadingResellerClients,
-    sendSMS,
     topUpResellerClient,
     topUpSubAccount,
     testCredentials,
     checkBalance,
-    isSendingSMS,
     isToppingUpReseller,
     isToppingUpSub,
     isTestingCredentials,
@@ -44,31 +42,9 @@ export function MspaceUserManagement() {
     refreshAll
   } = useMspaceApi();
 
-  // SMS Form State
-  const [smsRecipient, setSmsRecipient] = useState('');
-  const [smsMessage, setSmsMessage] = useState('');
-
-
   // Top-up Form State
   const [resellerTopUp, setResellerTopUp] = useState({ clientname: '', noofsms: '' });
   const [subTopUp, setSubTopUp] = useState({ subaccname: '', noofsms: '' });
-
-  const handleSendSMS = async () => {
-    if (!smsRecipient || !smsMessage) {
-      return;
-    }
-
-    await sendSMS.mutateAsync({
-      recipient: smsRecipient,
-      message: smsMessage
-    });
-
-    // Clear form on success
-    if (sendSMS.isSuccess) {
-      setSmsRecipient('');
-      setSmsMessage('');
-    }
-  };
 
   const handleResellerTopUp = async () => {
     if (!resellerTopUp.clientname || !resellerTopUp.noofsms) {
@@ -126,8 +102,8 @@ export function MspaceUserManagement() {
   }
 
   // Check for CORS/API connection issues
-  const hasConnectionIssues = sendSMS.error?.message?.includes('CORS') ||
-                             sendSMS.error?.message?.includes('Failed to send a request to the Edge Function') ||
+  const hasConnectionIssues = checkBalance.error?.message?.includes('CORS') ||
+                              checkBalance.error?.message?.includes('Failed to send a request to the Edge Function') ||
                              checkBalance.error?.message?.includes('CORS') ||
                              checkBalance.error?.message?.includes('Failed to send a request to the Edge Function');
 
@@ -144,7 +120,7 @@ export function MspaceUserManagement() {
             <br />
             <strong>Error Details:</strong>
             <br />
-            {sendSMS.error?.message || checkBalance.error?.message}
+            {checkBalance.error?.message}
           </AlertDescription>
         </Alert>
 
@@ -164,7 +140,7 @@ export function MspaceUserManagement() {
                 <strong>Issue:</strong> CORS (Cross-Origin Resource Sharing) policy is blocking API requests
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Impact:</strong> Balance checking, SMS sending, and account management features are temporarily unavailable
+                <strong>Impact:</strong> Balance checking and account management features are temporarily unavailable
               </p>
               <p className="text-sm text-gray-600">
                 <strong>Resolution:</strong> The edge function configuration is being updated to fix this issue
@@ -173,7 +149,6 @@ export function MspaceUserManagement() {
               <div className="flex gap-2 pt-2">
                 <Button
                   onClick={() => {
-                    sendSMS.reset();
                     checkBalance.reset();
                     testCredentials.reset();
                     refreshAll();
@@ -269,9 +244,8 @@ export function MspaceUserManagement() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sms">Send SMS</TabsTrigger>
           <TabsTrigger value="subusers">Sub Users</TabsTrigger>
           <TabsTrigger value="resellers">Reseller Clients</TabsTrigger>
           <TabsTrigger value="topup">Top-up</TabsTrigger>
@@ -322,49 +296,6 @@ export function MspaceUserManagement() {
           </div>
         </TabsContent>
 
-        <TabsContent value="sms" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Send SMS</CardTitle>
-              <CardDescription>Send SMS messages using your Mspace account</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="recipient">Recipient</Label>
-                  <Input
-                    id="recipient"
-                    placeholder="e.g., +254700000000"
-                    value={smsRecipient}
-                    onChange={(e) => setSmsRecipient(e.target.value)}
-                  />
-                </div>
-
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <textarea
-                  id="message"
-                  className="w-full min-h-[100px] p-3 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your SMS message..."
-                  value={smsMessage}
-                  onChange={(e) => setSmsMessage(e.target.value)}
-                />
-                <div className="text-sm text-gray-500">
-                  {smsMessage.length}/160 characters
-                </div>
-              </div>
-              <Button 
-                onClick={handleSendSMS}
-                disabled={!smsRecipient || !smsMessage || isSendingSMS}
-                className="w-full"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                {isSendingSMS ? 'Sending...' : 'Send SMS'}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="subusers" className="space-y-6">
           <Card>
