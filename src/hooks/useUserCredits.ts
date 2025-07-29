@@ -6,8 +6,10 @@ import { toast } from 'sonner';
 export interface UserCredits {
   id: string;
   user_id: string;
-  credits_remaining: number;
-  credits_purchased: number;
+  service_type: string;
+  credits: number;
+  credits_remaining: number; // For backward compatibility
+  credits_purchased: number; // For backward compatibility
   created_at: string;
   updated_at: string;
 }
@@ -30,15 +32,13 @@ export const useUserCredits = () => {
 
       if (error) throw error;
       
-      // Transform to match expected interface
       if (data) {
+        // Transform to include backward compatibility fields
         return {
-          id: data.id,
-          user_id: data.user_id,
-          credits_remaining: data.credits_remaining || data.credits_balance || 0,
-          credits_purchased: data.credits_purchased || data.credits_balance || 0,
-          created_at: data.created_at,
-          updated_at: data.updated_at || data.last_updated
+          ...data,
+          credits: data.credits_balance || data.balance || 0,
+          credits_remaining: data.credits_remaining || data.credits_balance || data.balance || 0,
+          credits_purchased: data.credits_purchased || data.total_purchased || 0
         };
       }
       
@@ -50,14 +50,17 @@ export const useUserCredits = () => {
 
   const purchaseCredits = useMutation({
     mutationFn: async (amount: number) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data, error } = await supabase
         .from('user_credits')
         .update({
-          credits_remaining: (credits?.credits_remaining || 0) + amount,
-          credits_purchased: (credits?.credits_purchased || 0) + amount,
+          credits_balance: (credits?.credits || 0) + amount,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', credits?.user_id)
+        .eq('user_id', user.id)
+        .eq('service_type', 'sms')
         .select()
         .single();
 
