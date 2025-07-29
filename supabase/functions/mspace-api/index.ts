@@ -183,12 +183,11 @@ serve(async (req) => {
     console.log(`Username: ${mspaceCredentials.username}`)
     console.log(`API Key length: ${mspaceCredentials.password?.length || 0}`)
 
-    // Make the API call to Mspace with dynamic method and body
+    // Make the API call to Mspace with proper headers
     const fetchOptions: any = {
       method: method,
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'Accept': 'text/plain, */*',
         'User-Agent': 'MobiWave-SMS-Service/1.0'
       }
     }
