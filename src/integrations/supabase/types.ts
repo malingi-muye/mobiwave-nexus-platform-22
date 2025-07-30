@@ -2212,6 +2212,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_client_profile: {
+        Args: { login_identifier: string; login_password: string }
+        Returns: {
+          id: string
+          user_id: string
+          client_name: string
+          username: string
+          email: string
+          is_active: boolean
+        }[]
+      }
       get_user_role: {
         Args: { user_uuid: string }
         Returns: string

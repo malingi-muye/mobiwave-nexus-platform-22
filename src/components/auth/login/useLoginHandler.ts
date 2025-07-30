@@ -20,38 +20,34 @@ export function useLoginHandler() {
     let isClientProfile = false;
 
     try {
-      // First try client_profiles authentication
-      const { data: clientProfile, error: clientError } = await supabase
-        .from('client_profiles')
-        .select('*')
-        .or(`email.eq.${email},username.eq.${email}`)
-        .maybeSingle();
+      // First try client_profiles authentication using secure function
+      const { data: clientProfiles, error: clientError } = await supabase
+        .rpc('authenticate_client_profile', {
+          login_identifier: email,
+          login_password: password
+        });
 
-      if (clientProfile) {
-        // Verify password using base64 encoding (same as when creating client profiles)
-        const hashedPassword = btoa(password);
+      if (clientProfiles && clientProfiles.length > 0) {
+        const clientProfile = clientProfiles[0];
+        isClientProfile = true;
         
-        if (hashedPassword === clientProfile.password_hash) {
-          isClientProfile = true;
-          
-          // Update last login
-          await supabase
-            .from('client_profiles')
-            .update({ last_login: new Date().toISOString() })
-            .eq('id', clientProfile.id);
+        // Update last login
+        await supabase
+          .from('client_profiles')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', clientProfile.id);
 
-          await logSecurityEvent('successful_client_login', 'low', { 
-            client_id: clientProfile.id,
-            client_name: clientProfile.client_name 
-          });
-          
-          toast.success('Successfully logged in!');
-          
-          // Redirect to client dashboard
-          window.location.href = '/dashboard';
-          setIsLoading(false);
-          return;
-        }
+        await logSecurityEvent('successful_client_login', 'low', { 
+          client_id: clientProfile.id,
+          client_name: clientProfile.client_name 
+        });
+        
+        toast.success('Successfully logged in!');
+        
+        // Redirect to client dashboard
+        window.location.href = '/dashboard';
+        setIsLoading(false);
+        return;
       }
 
       // If not a client profile, try regular Supabase auth
