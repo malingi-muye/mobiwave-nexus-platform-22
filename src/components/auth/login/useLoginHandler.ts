@@ -17,8 +17,45 @@ export function useLoginHandler() {
     setIsLoading(true);
 
     let profile = null;
+    let isClientProfile = false;
 
     try {
+      // First try client_profiles authentication
+      const { data: clientProfile, error: clientError } = await supabase
+        .from('client_profiles')
+        .select('*')
+        .or(`email.eq.${email},username.eq.${email}`)
+        .single();
+
+      if (clientProfile) {
+        // Verify password using crypto-js (same as when creating client profiles)
+        const CryptoJS = await import('crypto-js');
+        const hashedPassword = CryptoJS.SHA256(password).toString();
+        
+        if (hashedPassword === clientProfile.password_hash) {
+          isClientProfile = true;
+          
+          // Update last login
+          await supabase
+            .from('client_profiles')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', clientProfile.id);
+
+          await logSecurityEvent('successful_client_login', 'low', { 
+            client_id: clientProfile.id,
+            client_name: clientProfile.client_name 
+          });
+          
+          toast.success('Successfully logged in!');
+          
+          // Redirect to client dashboard
+          window.location.href = '/dashboard';
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // If not a client profile, try regular Supabase auth
       // Check if account is locked first
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
