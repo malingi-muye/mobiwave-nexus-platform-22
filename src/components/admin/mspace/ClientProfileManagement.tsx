@@ -56,11 +56,14 @@ export function ClientProfileManagement() {
   // Update form data when reseller client is selected
   useEffect(() => {
     if (selectedResellerClient) {
-      const client = resellerClients.find(c => c.clientname === selectedResellerClient);
+      const client = resellerClients.find(c => {
+        const clientName = (c as any).clientUserName || c.clientname;
+        return clientName === selectedResellerClient;
+      });
       if (client) {
         setFormData(prev => ({
           ...prev,
-          username: client.clientname,
+          username: selectedResellerClient,
           sms_balance: parseInt(client.smsBalance || '0')
         }));
       }
@@ -159,12 +162,15 @@ export function ClientProfileManagement() {
                   <SelectTrigger>
                     <SelectValue placeholder={isLoadingResellerClients ? "Loading reseller clients..." : "Select a reseller client"} />
                   </SelectTrigger>
-                  <SelectContent>
-                    {resellerClients.map((client) => (
-                      <SelectItem key={client.clientname} value={client.clientname}>
-                        {client.clientname} (Balance: {client.smsBalance || '0'} SMS)
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-white z-50">
+                    {resellerClients.map((client) => {
+                      const clientName = (client as any).clientUserName || client.clientname;
+                      return (
+                        <SelectItem key={clientName} value={clientName} className="bg-white hover:bg-gray-100">
+                          {clientName} (Balance: {client.smsBalance || '0'} SMS)
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
