@@ -25,12 +25,11 @@ export function useLoginHandler() {
         .from('client_profiles')
         .select('*')
         .or(`email.eq.${email},username.eq.${email}`)
-        .single();
+        .maybeSingle();
 
       if (clientProfile) {
-        // Verify password using crypto-js (same as when creating client profiles)
-        const CryptoJS = await import('crypto-js');
-        const hashedPassword = CryptoJS.SHA256(password).toString();
+        // Verify password using base64 encoding (same as when creating client profiles)
+        const hashedPassword = btoa(password);
         
         if (hashedPassword === clientProfile.password_hash) {
           isClientProfile = true;
@@ -61,7 +60,7 @@ export function useLoginHandler() {
         .from('profiles')
         .select('failed_login_attempts, locked_until')
         .eq('email', email)
-        .single();
+        .maybeSingle();
 
       profile = profileData;
 
