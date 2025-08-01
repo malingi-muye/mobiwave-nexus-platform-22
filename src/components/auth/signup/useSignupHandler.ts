@@ -72,10 +72,9 @@ export function useSignupHandler() {
 
       if (data.user && !data.user.email_confirmed_at) {
         toast.success('Please check your email to confirm your account');
-        navigate('/auth');
       } else if (data.user) {
         toast.success('Account created successfully!');
-        navigate('/dashboard');
+        // Let the AuthPage handle navigation based on user role
       }
     } catch (error: any) {
       console.error('Signup error:', error);
