@@ -42,23 +42,20 @@ export function useLoginHandler() {
           client_name: clientProfile.client_name 
         });
         
-        // Create a proper Supabase auth session for client profiles
-        // Since client profiles use their own auth system, we need to 
-        // sign them in with a dummy password to create a session
-        try {
-          await supabase.auth.signInWithPassword({
-            email: clientProfile.email,
-            password: 'client-profile-session' // This will fail but that's expected
-          });
-        } catch {
-          // Expected to fail - client profiles don't have Supabase auth accounts
-          // Instead, we'll manually set the auth state by triggering the auth flow
-          // The trigger we created will ensure they have a profile entry with role 'user'
-          console.log('Client profile authenticated, profile entry should exist via trigger');
-        }
-        
         toast.success('Successfully logged in!');
-        setIsLoading(false);
+        
+        // Store client profile session in localStorage for routing
+        localStorage.setItem('client_session', JSON.stringify({
+          user_id: clientProfile.user_id,
+          email: clientProfile.email,
+          client_name: clientProfile.client_name,
+          role: 'user',
+          user_type: 'client',
+          authenticated_at: new Date().toISOString()
+        }));
+        
+        // Force page refresh to trigger auth state check with stored session
+        window.location.reload();
         return;
       }
 

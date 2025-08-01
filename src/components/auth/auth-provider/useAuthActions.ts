@@ -28,6 +28,10 @@ export function useAuthActions(setIsLoading: (loading: boolean) => void, setUser
   const logout = async () => {
     try {
       console.log('Logging out...');
+      
+      // Clear client profile session from localStorage
+      localStorage.removeItem('client_session');
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -37,6 +41,13 @@ export function useAuthActions(setIsLoading: (loading: boolean) => void, setUser
       console.log('Logout successful');
     } catch (error) {
       console.error('Logout failed:', error);
+      
+      // Even if Supabase logout fails, clear local state for client profiles
+      localStorage.removeItem('client_session');
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      
       throw error;
     }
   };

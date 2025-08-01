@@ -114,6 +114,34 @@ export function useAuthState() {
       try {
         console.log('Checking for existing session...');
 
+        // First check for client profile session in localStorage
+        const clientSession = localStorage.getItem('client_session');
+        if (clientSession) {
+          try {
+            const sessionData = JSON.parse(clientSession);
+            console.log('Found client profile session:', sessionData);
+            
+            // Create a mock user object for client profiles
+            const mockUser = {
+              id: sessionData.user_id,
+              email: sessionData.email,
+              user_metadata: {
+                client_name: sessionData.client_name,
+                role: sessionData.role,
+                user_type: sessionData.user_type
+              }
+            };
+            
+            setUser(mockUser as any);
+            setUserRole(sessionData.role);
+            setIsLoading(false);
+            return;
+          } catch (parseError) {
+            console.error('Failed to parse client session:', parseError);
+            localStorage.removeItem('client_session');
+          }
+        }
+
         // Add timeout to prevent hanging on network issues
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Session check timeout')), 10000)
