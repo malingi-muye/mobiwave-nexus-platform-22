@@ -89,20 +89,47 @@ const ApiCredentialsTab: React.FC = () => {
   // Save credential mutation
   const saveCredentialMutation = useMutation({
     mutationFn: async ({ service_name, api_key, user_id, username }: { service_name: string; api_key: string; user_id: string; username: string }) => {
-      const { data, error } = await supabase
+      // First check if credential already exists
+      const { data: existing } = await supabase
         .from('api_credentials')
-        .insert({
-          service_name,
-          api_key_encrypted: api_key, // Store directly - let RLS handle any encryption
-          user_id,
-          username,
-          is_active: true
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('service_name', service_name)
+        .maybeSingle();
 
-      if (error) throw error;
-      return data;
+      if (existing) {
+        // Update existing credential
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .update({
+            api_key_encrypted: api_key,
+            username,
+            is_active: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // Insert new credential
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .insert({
+            service_name,
+            api_key_encrypted: api_key,
+            user_id,
+            username,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
