@@ -4,6 +4,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCompleteUserManagement } from '@/hooks/useCompleteUserManagement';
 
+interface ClientProfile {
+  id: string;
+  user_id: string;
+  client_name: string;
+  username: string;
+  email: string | null;
+  created_at: string;
+  is_active: boolean;
+}
+
 interface ApiCredential {
   id: string;
   user_id: string;
@@ -26,6 +36,41 @@ const ApiCredentialsTab: React.FC = () => {
 
   // Get all users for admin assignment
   const { users: allUsers, isLoading: usersLoading } = useCompleteUserManagement('', 'all', 'all');
+
+  // Fetch client profiles
+  const { data: clientProfiles = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ['client-profiles'],
+    queryFn: async (): Promise<ClientProfile[]> => {
+      const { data, error } = await supabase
+        .from('client_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Combine regular users and client profiles for selection
+  const allUsersAndClients = [
+    ...allUsers.map(user => ({
+      ...user,
+      type: 'user' as const,
+      display_name: user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : user.email,
+      identifier: user.email
+    })),
+    ...clientProfiles.map(client => ({
+      id: client.user_id,
+      email: client.email || '',
+      first_name: client.client_name,
+      last_name: '',
+      user_type: 'client',
+      type: 'client' as const,
+      display_name: client.client_name,
+      identifier: client.username,
+      client_profile_id: client.id
+    }))
+  ];
 
   // Fetch credentials directly from database
   const { data: credentials = [], isLoading, error } = useQuery({
@@ -154,15 +199,24 @@ const ApiCredentialsTab: React.FC = () => {
           value={selectedUserId}
           onChange={e => setSelectedUserId(e.target.value)}
           required
-          disabled={usersLoading}
+          disabled={usersLoading || clientsLoading}
         >
-          <option value="">Select User</option>
-          {allUsers.map(u => (
-            <option key={u.id} value={u.id}>
-              {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email}
-              {' '}[{u.email}] ({u.user_type || 'demo'})
-            </option>
-          ))}
+          <option value="">Select User/Client</option>
+          <optgroup label="Regular Users">
+            {allUsers.map(u => (
+              <option key={`user-${u.id}`} value={u.id}>
+                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email}
+                {' '}[{u.email}] ({u.user_type || 'demo'})
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Client Profiles">
+            {clientProfiles.map(c => (
+              <option key={`client-${c.user_id}`} value={c.user_id}>
+                {c.client_name} [{c.username}] (client)
+              </option>
+            ))}
+          </optgroup>
         </select>
         <input
           type="text"
@@ -202,6 +256,9 @@ const ApiCredentialsTab: React.FC = () => {
         <div className="space-y-4">
           {credentials.map(cred => {
             const user = allUsers.find(u => u.id === cred.user_id);
+            const client = clientProfiles.find(c => c.user_id === cred.user_id);
+            const isClientUser = !!client;
+            
             return (
               <div key={cred.id} className="bg-white border border-gray-100 shadow-sm rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex-1">
@@ -211,13 +268,14 @@ const ApiCredentialsTab: React.FC = () => {
                   </div>
                   <div className="text-gray-500 text-sm mt-1">
                     Assigned to: <span className="font-semibold">
-                      {user
-                        ? ((user.first_name || user.last_name)
-                            ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
-                            : user.email)
-                        : cred.user_id}
-                      {' '}[{user?.email || ''}]
-                    </span> <span className="ml-2 text-xs text-gray-400">({user?.user_type || 'demo'})</span>
+                      {isClientUser 
+                        ? `${client.client_name} [${client.username}]`
+                        : user
+                          ? ((user.first_name || user.last_name)
+                              ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                              : user.email) + ` [${user.email}]`
+                          : cred.user_id}
+                    </span> <span className="ml-2 text-xs text-gray-400">({isClientUser ? 'client' : user?.user_type || 'demo'})</span>
                   </div>
                   <div className="text-gray-500 text-sm mt-1">
                     Created: {new Date(cred.created_at).toLocaleString()}
