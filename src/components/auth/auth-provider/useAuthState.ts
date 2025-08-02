@@ -85,10 +85,21 @@ export function useAuthState() {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
+        // Check if we have a client session first - don't override it
+        const clientSession = localStorage.getItem('client_session');
+        if (clientSession && !session) {
+          console.log('Preserving client session, ignoring auth state change');
+          setIsLoading(false);
+          return;
+        }
+        
         if (event === 'SIGNED_OUT' || !session) {
-          setSession(null);
-          setUser(null);
-          setUserRole(null);
+          // Only clear state if we don't have a client session
+          if (!clientSession) {
+            setSession(null);
+            setUser(null);
+            setUserRole(null);
+          }
           setIsLoading(false);
           return;
         }
