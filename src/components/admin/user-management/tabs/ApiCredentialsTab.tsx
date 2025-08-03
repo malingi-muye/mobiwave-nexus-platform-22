@@ -89,8 +89,6 @@ const ApiCredentialsTab: React.FC = () => {
   // Save credential mutation
   const saveCredentialMutation = useMutation({
     mutationFn: async ({ service_name, api_key, user_id, username }: { service_name: string; api_key: string; user_id: string; username: string }) => {
-      console.log('Starting credential save for:', { service_name, user_id, username });
-      
       // First check if credential already exists
       const { data: existing, error: checkError } = await supabase
         .from('api_credentials')
@@ -100,14 +98,10 @@ const ApiCredentialsTab: React.FC = () => {
         .maybeSingle();
 
       if (checkError) {
-        console.error('Error checking existing credential:', checkError);
         throw checkError;
       }
 
-      console.log('Existing credential check result:', existing);
-
       if (existing) {
-        console.log('Updating existing credential:', existing.id);
         // Update existing credential
         const { data, error } = await supabase
           .from('api_credentials')
@@ -122,13 +116,10 @@ const ApiCredentialsTab: React.FC = () => {
           .single();
 
         if (error) {
-          console.error('Error updating credential:', error);
           throw error;
         }
-        console.log('Successfully updated credential:', data);
         return data;
       } else {
-        console.log('Creating new credential');
         // Insert new credential
         const { data, error } = await supabase
           .from('api_credentials')
@@ -143,20 +134,16 @@ const ApiCredentialsTab: React.FC = () => {
           .single();
 
         if (error) {
-          console.error('Error creating credential:', error);
           throw error;
         }
-        console.log('Successfully created credential:', data);
         return data;
       }
     },
     onSuccess: (data) => {
-      console.log('Credential save successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
       toast.success('API credentials saved successfully');
     },
     onError: (error: any) => {
-      console.error('Credential save failed:', error);
       toast.error(`Failed to save credentials: ${error.message}`);
     }
   });
