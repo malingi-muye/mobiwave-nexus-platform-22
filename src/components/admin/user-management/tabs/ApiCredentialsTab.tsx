@@ -355,7 +355,11 @@ const ApiCredentialsTab: React.FC = () => {
           {credentials.map(cred => {
             const user = allUsers.find(u => u.id === cred.user_id);
             const client = clientProfiles.find(c => c.user_id === cred.user_id);
-            const isClientUser = !!client;
+            
+            // Check if this credential was created for a specific client profile by checking the username
+            const isClientCredential = client && cred.username === client.username;
+            // If no username match and both user and client exist, prioritize the regular user
+            const isClientUser = isClientCredential || (!user && !!client);
             
             return (
               <div key={cred.id} className="bg-white border border-gray-100 shadow-sm rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
