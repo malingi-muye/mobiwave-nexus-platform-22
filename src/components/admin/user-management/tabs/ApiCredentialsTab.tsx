@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useCompleteUserManagement } from '@/hooks/useCompleteUserManagement';
 
 interface ClientProfile {
   id: string;
@@ -34,8 +33,42 @@ const ApiCredentialsTab: React.FC = () => {
   const [editApiKey, setEditApiKey] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
 
-  // Get all users for admin assignment
-  const { users: allUsers, isLoading: usersLoading } = useCompleteUserManagement('', 'all', 'all');
+  // Get all users directly from auth for admin assignment
+  const { data: authUsers = [], isLoading: usersLoading } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('admin-users');
+      if (error) throw error;
+      return data?.users || [];
+    }
+  });
+
+  // Get profiles to enrich user data
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['profiles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, email, first_name, last_name, full_name, role, user_type');
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Combine auth users with profile data
+  const allUsers = authUsers.map(authUser => {
+    const profile = profiles.find(p => p.id === authUser.id);
+    return {
+      id: authUser.id,
+      email: authUser.email,
+      first_name: profile?.first_name || '',
+      last_name: profile?.last_name || '',
+      full_name: profile?.full_name || '',
+      role: profile?.role || 'user',
+      user_type: profile?.user_type || 'demo',
+      ...authUser
+    };
+  });
 
   // Fetch client profiles
   const { data: clientProfiles = [], isLoading: clientsLoading } = useQuery({
