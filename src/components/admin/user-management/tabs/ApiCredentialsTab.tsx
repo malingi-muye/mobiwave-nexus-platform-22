@@ -184,7 +184,23 @@ const ApiCredentialsTab: React.FC = () => {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!serviceName || !apiKey || !selectedUserId || !username) return;
-    await saveCredentialMutation.mutateAsync({ service_name: serviceName, api_key: apiKey, user_id: selectedUserId, username });
+    
+    // Parse the selectedUserId to get the actual user_id
+    let actualUserId = selectedUserId;
+    if (selectedUserId.startsWith('client-')) {
+      const clientId = selectedUserId.replace('client-', '');
+      const selectedClient = clientProfiles.find(c => c.id === clientId);
+      if (selectedClient) {
+        actualUserId = selectedClient.user_id;
+      }
+    }
+    
+    await saveCredentialMutation.mutateAsync({ 
+      service_name: serviceName, 
+      api_key: apiKey, 
+      user_id: actualUserId, 
+      username 
+    });
     setServiceName('');
     setApiKey('');
     setUsername('');
@@ -266,11 +282,16 @@ const ApiCredentialsTab: React.FC = () => {
           className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:outline-none w-full md:w-1/4"
           value={selectedUserId}
           onChange={e => {
-            setSelectedUserId(e.target.value);
+            const value = e.target.value;
+            setSelectedUserId(value);
+            
             // Auto-populate username for client profiles
-            const selectedClient = clientProfiles.find(c => c.user_id === e.target.value);
-            if (selectedClient) {
-              setUsername(selectedClient.username);
+            if (value.startsWith('client-')) {
+              const clientId = value.replace('client-', '');
+              const selectedClient = clientProfiles.find(c => c.id === clientId);
+              if (selectedClient) {
+                setUsername(selectedClient.username);
+              }
             } else {
               setUsername('');
             }
@@ -289,7 +310,7 @@ const ApiCredentialsTab: React.FC = () => {
           </optgroup>
           <optgroup label="Client Profiles">
             {clientProfiles.map(c => (
-              <option key={`client-${c.user_id}`} value={c.user_id}>
+              <option key={`client-${c.id}`} value={`client-${c.id}`}>
                 {c.client_name} [{c.username}] (client)
               </option>
             ))}
