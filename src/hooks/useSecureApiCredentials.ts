@@ -24,40 +24,101 @@ export const useSecureApiCredentials = () => {
   const { data: credentials = [], isLoading, error } = useQuery({
     queryKey: ['api-credentials'],
     queryFn: async (): Promise<ApiCredential[]> => {
-      const { data, error } = await supabase
-        .from('api_credentials')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Get current user to determine which tables to query
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
 
-      if (error) throw error;
-      // Ensure username is present for type safety
-      return (data || []).map((row: any) => ({
-        ...row,
-        username: row.username ?? ''
-      }));
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
+      if (isAdmin) {
+        // Admin users see their admin keys
+        const { data, error } = await supabase
+          .from('admin_api_keys')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return (data || []).map((row: any) => ({
+          ...row,
+          username: row.key_name ?? '',
+          api_key_encrypted: row.api_key_hash,
+          service_name: 'mspace',
+          is_active: row.status === 'active'
+        }));
+      } else {
+        // Regular users see their api credentials
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return (data || []).map((row: any) => ({
+          ...row,
+          username: row.username ?? ''
+        }));
+      }
     }
   });
 
   // Save credential directly to database
   const saveCredential = useMutation({
     mutationFn: async ({ service_name, api_key, user_id, username }: { service_name: string; api_key: string; user_id: string; username: string }) => {
-      const { data, error } = await supabase
-        .from('api_credentials')
-        .insert({
-          service_name,
-          api_key_encrypted: api_key, // Store directly
-          user_id,
-          username,
-          is_active: true
-        })
-        .select()
+      // Check if user is admin to determine which table to use
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user_id)
         .single();
 
-      if (error) {
-        throw new Error(error.message || 'Failed to save credentials');
-      }
+      const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
 
-      return data;
+      if (isAdmin) {
+        // Save to admin_api_keys table
+        const { data, error } = await supabase
+          .from('admin_api_keys')
+          .insert({
+            user_id,
+            key_name: username,
+            api_key_hash: api_key, // Store directly for now
+            api_key_preview: api_key.substring(0, 8) + '...',
+            status: 'active',
+            permissions: ['read', 'write']
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(error.message || 'Failed to save admin credentials');
+        }
+        return data;
+      } else {
+        // Save to api_credentials table
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .insert({
+            service_name,
+            api_key_encrypted: api_key,
+            user_id,
+            username,
+            is_active: true
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(error.message || 'Failed to save credentials');
+        }
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
@@ -70,18 +131,43 @@ export const useSecureApiCredentials = () => {
 
   const updateCredential = useMutation({
     mutationFn: async ({ id, api_key }: { id: string; api_key: string }) => {
-      const { data, error } = await supabase
-        .from('api_credentials')
-        .update({ api_key_encrypted: api_key }) // Store directly
+      // First try to find in admin_api_keys table
+      const { data: adminKey } = await supabase
+        .from('admin_api_keys')
+        .select('id')
         .eq('id', id)
-        .select()
         .single();
 
-      if (error) {
-        throw new Error(error.message || 'Failed to update credentials');
-      }
+      if (adminKey) {
+        // Update admin key
+        const { data, error } = await supabase
+          .from('admin_api_keys')
+          .update({ 
+            api_key_hash: api_key,
+            api_key_preview: api_key.substring(0, 8) + '...'
+          })
+          .eq('id', id)
+          .select()
+          .single();
 
-      return data;
+        if (error) {
+          throw new Error(error.message || 'Failed to update admin credentials');
+        }
+        return data;
+      } else {
+        // Update regular credential
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .update({ api_key_encrypted: api_key })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(error.message || 'Failed to update credentials');
+        }
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
@@ -94,11 +180,26 @@ export const useSecureApiCredentials = () => {
 
   const deleteCredential = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('api_credentials')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
+      // First try to delete from admin_api_keys table
+      const { data: adminKey } = await supabase
+        .from('admin_api_keys')
+        .select('id')
+        .eq('id', id)
+        .single();
+
+      if (adminKey) {
+        const { error } = await supabase
+          .from('admin_api_keys')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('api_credentials')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      }
       return id;
     },
     onSuccess: () => {
@@ -133,30 +234,66 @@ export const useSecureApiCredentials = () => {
       const user = await supabase.auth.getUser();
       if (!user.data.user) throw new Error('User not authenticated');
 
+      // Check if user is admin
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.data.user.id)
+        .single();
+
+      const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
       // Generate a random API key
       const apiKey = `${serviceName}_${keyName.includes('live') ? 'live' : 'test'}_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
 
-      const { data, error } = await supabase
-        .from('api_credentials')
-        .insert({
-          service_name: serviceName,
-          api_key_encrypted: apiKey, // Store directly
-          user_id: user.data.user.id,
-          username: keyName,
-          is_active: true,
-          expires_at: expiresAt
-        })
-        .select()
-        .single();
+      if (isAdmin) {
+        // Generate admin API key
+        const { data, error } = await supabase
+          .from('admin_api_keys')
+          .insert({
+            user_id: user.data.user.id,
+            key_name: keyName,
+            api_key_hash: apiKey,
+            api_key_preview: apiKey.substring(0, 8) + '...',
+            status: 'active',
+            permissions: permissions.length > 0 ? permissions : ['read', 'write'],
+            expires_at: expiresAt
+          })
+          .select()
+          .single();
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate API key');
+        if (error) {
+          throw new Error(error.message || 'Failed to generate admin API key');
+        }
+
+        return {
+          ...data,
+          api_key: apiKey // Return the unencrypted key for one-time display
+        };
+      } else {
+        // Generate regular API key
+        const { data, error } = await supabase
+          .from('api_credentials')
+          .insert({
+            service_name: serviceName,
+            api_key_encrypted: apiKey,
+            user_id: user.data.user.id,
+            username: keyName,
+            is_active: true,
+            expires_at: expiresAt
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(error.message || 'Failed to generate API key');
+        }
+
+        return {
+          ...data,
+          api_key: apiKey // Return the unencrypted key for one-time display
+        };
       }
-
-      return {
-        ...data,
-        api_key: apiKey // Return the unencrypted key for one-time display
-      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
@@ -170,12 +307,26 @@ export const useSecureApiCredentials = () => {
   // Toggle API key functionality (previously in useApiKeys)
   const toggleApiKey = useMutation({
     mutationFn: async ({ keyId, isActive }: { keyId: string; isActive: boolean }) => {
-      const { error } = await supabase
-        .from('api_credentials')
-        .update({ is_active: isActive })
-        .eq('id', keyId);
+      // First try to find in admin_api_keys table
+      const { data: adminKey } = await supabase
+        .from('admin_api_keys')
+        .select('id')
+        .eq('id', keyId)
+        .single();
 
-      if (error) throw error;
+      if (adminKey) {
+        const { error } = await supabase
+          .from('admin_api_keys')
+          .update({ status: isActive ? 'active' : 'inactive' })
+          .eq('id', keyId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('api_credentials')
+          .update({ is_active: isActive })
+          .eq('id', keyId);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-credentials'] });
