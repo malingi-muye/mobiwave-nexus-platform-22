@@ -19,7 +19,8 @@ import {
   Mail
 } from 'lucide-react';
 import { ClientDashboardLayout } from './ClientDashboardLayout';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useCampaigns, Campaign } from '@/hooks/useCampaigns';
 import { useSurveys, Survey } from '@/hooks/useSurveys';
 import { useContacts, Contact } from '@/hooks/useContacts';
@@ -36,6 +37,7 @@ import { Contacts } from './Contacts';
 
 export function ClientDashboard() {
   const { user } = useAuth();
+  const { getDisplayName } = useUserProfile();
   const { campaigns, isLoading: campaignsLoading } = useCampaigns();
   const { surveys, isLoading: surveysLoading } = useSurveys();
   const { contacts, isLoading: contactsLoading } = useContacts();
@@ -97,12 +99,12 @@ export function ClientDashboard() {
         <div className="space-y-6 p-3 sm:p-4 md:p-6">
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-xs sm:text-sm md:text-base text-gray-600">
-                Welcome back! Here's what's happening with your account.
-              </p>
-            </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600">
+              Welcome back, {getDisplayName()}! Here's what's happening with your account.
+            </p>
+          </div>
             <div className="flex items-center space-x-3 sm:space-x-4">
               <div className="flex items-center space-x-2">
                 <Activity className={`w-4 h-4 ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
@@ -118,11 +120,12 @@ export function ClientDashboard() {
           <MetricsGrid />
 
           {/* Key metrics cards */}
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
             {[
               { title: 'Active Campaigns', value: activeCampaigns.length, icon: Send, path: '/bulk-sms' },
               { title: 'Active Surveys', value: activeSurveys.length, icon: FileText, path: '/surveys' },
-              { title: 'Remaining Credits', value: `KES ${remainingCredits.toFixed(2)}`, icon: CreditCard, path: '/billing' }
+              { title: 'Total Contacts', value: totalContacts, icon: Users, path: '/contacts' },
+              { title: 'SMS Credits', value: `${remainingCredits.toFixed(2)}`, icon: CreditCard, path: '/billing' }
             ].map((metric, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

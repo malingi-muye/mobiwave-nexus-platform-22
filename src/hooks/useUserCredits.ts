@@ -36,7 +36,21 @@ export const useUserCredits = () => {
         return data;
       }
       
-      return null;
+      // If no credits record exists, create one with zero balance
+      const { data: newRecord, error: insertError } = await supabase
+        .from('user_credits')
+        .insert({
+          user_id: user.id,
+          service_type: 'sms',
+          credits: 0,
+          credits_remaining: 0,
+          credits_purchased: 0
+        })
+        .select()
+        .single();
+      
+      if (insertError) throw insertError;
+      return newRecord;
     },
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
