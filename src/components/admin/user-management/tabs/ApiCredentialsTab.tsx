@@ -275,8 +275,11 @@ const ApiCredentialsTab: React.FC = () => {
     <div className="p-6 max-w-2xl mx-auto">
       <h2 className="text-3xl font-extrabold mb-6 text-blue-900 flex items-center gap-2">
         <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-lg">🔑</span>
-        API Credentials
+        Reseller API Credentials
       </h2>
+      <p className="text-gray-600 mb-4">
+        Manage API credentials for reseller clients only. Admin API credentials are managed in Profile Settings.
+      </p>
       <form className="mb-8 flex flex-col md:flex-row gap-3 md:gap-4 items-center bg-white shadow rounded-lg p-4 border border-gray-100" onSubmit={handleAdd}>
         <select
           className="border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:outline-none w-full md:w-1/4"
@@ -293,20 +296,30 @@ const ApiCredentialsTab: React.FC = () => {
                 setUsername(selectedClient.username);
               }
             } else {
-              setUsername('');
+              // Only allow reseller clients (user_type = 'client')
+              const selectedUser = allUsers.find(u => u.id === value);
+              if (selectedUser?.user_type === 'client') {
+                setUsername('');
+              } else {
+                // Clear selection if not a reseller client
+                setSelectedUserId('');
+                toast.error('Only reseller clients can be assigned API credentials');
+              }
             }
           }}
           required
           disabled={usersLoading || clientsLoading}
         >
-          <option value="">Select User/Client</option>
-          <optgroup label="Regular Users">
-            {allUsers.map(u => (
-              <option key={`user-${u.id}`} value={u.id}>
-                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email}
-                {' '}[{u.email}] ({u.user_type || 'demo'})
-              </option>
-            ))}
+          <option value="">Select Reseller Client</option>
+          <optgroup label="Reseller Users">
+            {allUsers
+              .filter(u => u.user_type === 'client')
+              .map(u => (
+                <option key={`user-${u.id}`} value={u.id}>
+                  {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email}
+                  {' '}[{u.email}] (reseller)
+                </option>
+              ))}
           </optgroup>
           <optgroup label="Client Profiles">
             {clientProfiles.map(c => (

@@ -28,8 +28,110 @@ import {
   XCircle,
   Loader2
 } from 'lucide-react';
-import { ApiCredentials } from '@/components/settings/ApiCredentials';
+import { useSecureApiCredentials } from '@/hooks/useSecureApiCredentials';
 import { adminProfileService, AdminProfile, AdminPreferences, AdminSecuritySettings } from '@/services/adminProfileService';
+
+// Admin API Credentials Component
+function AdminApiCredentials() {
+  const { credentials, generateApiKey, isGenerating } = useSecureApiCredentials();
+  const [keyName, setKeyName] = useState('');
+  const [newApiKey, setNewApiKey] = useState<string | null>(null);
+
+  const handleGenerateKey = async () => {
+    if (!keyName.trim()) {
+      toast.error('Please enter a key name');
+      return;
+    }
+
+    try {
+      const result = await generateApiKey({
+        keyName,
+        serviceName: 'mspace',
+        permissions: ['read', 'write']
+      });
+      
+      setNewApiKey(result.api_key);
+      setKeyName('');
+      toast.success('API key generated successfully');
+    } catch (error: any) {
+      toast.error(`Failed to generate API key: ${error.message}`);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Key className="w-5 h-5" />
+          Admin API Keys
+        </CardTitle>
+        <CardDescription>
+          Manage your administrator API keys for system access
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Generate New Key */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="keyName">Key Name</Label>
+            <Input
+              id="keyName"
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+              placeholder="e.g., Production API Key"
+            />
+          </div>
+          <Button 
+            onClick={handleGenerateKey}
+            disabled={isGenerating || !keyName.trim()}
+          >
+            {isGenerating ? 'Generating...' : 'Generate API Key'}
+          </Button>
+        </div>
+
+        {/* Show new API key */}
+        {newApiKey && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-yellow-600" />
+              <h4 className="font-medium text-yellow-900">New API Key Generated</h4>
+            </div>
+            <p className="text-sm text-yellow-800 mb-2">
+              Please copy this key now. You won't be able to see it again.
+            </p>
+            <div className="font-mono text-sm bg-white p-2 rounded border break-all">
+              {newApiKey}
+            </div>
+          </div>
+        )}
+
+        {/* Existing Keys */}
+        <div className="space-y-3">
+          <h4 className="font-medium">Existing API Keys</h4>
+          {credentials.length === 0 ? (
+            <p className="text-sm text-gray-500">No API keys generated yet</p>
+          ) : (
+            <div className="space-y-2">
+              {credentials.map((key) => (
+                <div key={key.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <div className="font-medium">{key.username}</div>
+                    <div className="text-sm text-gray-500">
+                      Created: {new Date(key.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <Badge variant={key.is_active ? "default" : "secondary"}>
+                    {key.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function AdminProfileSettings() {
   const { user } = useAuth();
@@ -816,7 +918,8 @@ export function AdminProfileSettings() {
       </Card>
 
       {/* Mspace API Configuration */}
-      <ApiCredentials />
+      {/* Admin API Credentials */}
+      <AdminApiCredentials />
 
       {/* Admin API Key Management */}
       <Card>
