@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useSmsBalance } from './useSmsBalance';
 
 export interface UserProfile {
   id: string;
@@ -71,7 +70,6 @@ export const useUserProfile = () => {
 
   const isLoading = profileLoading || clientLoading;
   const error = profileError || clientError;
-  const { balance: realTimeSmsBalance } = useSmsBalance();
 
   const getDisplayName = () => {
     console.log('Profile data:', { profile, clientProfile, userType: profile?.user_type });
@@ -95,16 +93,9 @@ export const useUserProfile = () => {
   };
 
   const getSmsBalance = () => {
-    console.log('SMS Balance check:', { 
-      profile, 
-      clientProfile, 
-      dbBalance: clientProfile?.sms_balance,
-      realTimeBalance: realTimeSmsBalance 
-    });
-    
-    // Use real-time balance from M-Space API if available, fallback to DB balance
-    if (profile?.user_type === 'client') {
-      return realTimeSmsBalance || clientProfile?.sms_balance || 0;
+    console.log('SMS Balance check:', { profile, clientProfile, smsBalance: clientProfile?.sms_balance });
+    if (profile?.user_type === 'client' && clientProfile) {
+      return clientProfile.sms_balance;
     }
     return 0;
   };
