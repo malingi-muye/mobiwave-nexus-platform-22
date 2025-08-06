@@ -72,6 +72,8 @@ export const useUserProfile = () => {
   const error = profileError || clientError;
 
   const getDisplayName = () => {
+    console.log('Profile data:', { profile, clientProfile, userType: profile?.user_type });
+    
     // For client users, use client_name
     if (profile?.user_type === 'client' && clientProfile?.client_name) {
       return clientProfile.client_name;
@@ -91,6 +93,7 @@ export const useUserProfile = () => {
   };
 
   const getSmsBalance = () => {
+    console.log('SMS Balance check:', { profile, clientProfile, smsBalance: clientProfile?.sms_balance });
     if (profile?.user_type === 'client' && clientProfile) {
       return clientProfile.sms_balance;
     }

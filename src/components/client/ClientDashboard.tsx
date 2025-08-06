@@ -30,7 +30,7 @@ import { useCacheOptimization, usePerformanceMonitoring } from '@/hooks/usePerfo
 import { ErrorBoundaryWrapper } from '@/components/common/ErrorBoundaryWrapper';
 import { LoadingState } from '@/components/common/LoadingState';
 import { RealTimeNotificationCenter } from '@/components/notifications/RealTimeNotificationCenter';
-import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
+import { ClientMetrics } from '@/components/dashboard/ClientMetrics';
 import { Link } from 'react-router-dom';
 import { ServiceStatusWidget } from './ServiceStatusWidget';
 import { Contacts } from './Contacts';
@@ -117,7 +117,7 @@ export function ClientDashboard() {
           </div>
 
           {/* Main Metrics Grid */}
-          <MetricsGrid />
+          <ClientMetrics />
 
           {/* Key metrics cards */}
           <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">

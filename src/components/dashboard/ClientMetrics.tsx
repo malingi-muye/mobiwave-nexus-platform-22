@@ -2,19 +2,20 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCampaigns } from '@/hooks/useCampaigns';
-import { useUserCredits } from '@/hooks/useUserCredits';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { MessageSquare, Send, CheckCircle, CreditCard } from 'lucide-react';
 
 export function ClientMetrics() {
   const { campaigns, isLoading: campaignsLoading } = useCampaigns();
-  const { data: credits, isLoading: creditsLoading } = useUserCredits();
+  const { getSmsBalance, isLoading: profileLoading } = useUserProfile();
 
   const totalCampaigns = campaigns?.length || 0;
   const totalSent = campaigns?.reduce((sum, c) => sum + (c.sent_count || 0), 0) || 0;
   const totalDelivered = campaigns?.reduce((sum, c) => sum + (c.delivered_count || 0), 0) || 0;
   const deliveryRate = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 0;
+  const smsBalance = getSmsBalance();
 
-  if (campaignsLoading || creditsLoading) {
+  if (campaignsLoading || profileLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
@@ -73,8 +74,8 @@ export function ClientMetrics() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Credits Remaining</p>
-              <p className="text-3xl font-bold">{credits?.credits_remaining?.toLocaleString() || '0'}</p>
+              <p className="text-sm font-medium text-gray-600 mb-1">SMS Balance</p>
+              <p className="text-3xl font-bold">{smsBalance.toLocaleString()}</p>
             </div>
             <CreditCard className="w-8 h-8 text-purple-600" />
           </div>
