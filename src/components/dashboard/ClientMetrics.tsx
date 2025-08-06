@@ -3,17 +3,18 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCampaigns } from '@/hooks/useCampaigns';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import { MessageSquare, Send, CheckCircle, CreditCard } from 'lucide-react';
+import { useSmsBalance } from '@/hooks/useSmsBalance';
+import { MessageSquare, Send, CheckCircle, CreditCard, RefreshCw } from 'lucide-react';
 
 export function ClientMetrics() {
   const { campaigns, isLoading: campaignsLoading } = useCampaigns();
-  const { getSmsBalance, isLoading: profileLoading } = useUserProfile();
+  const { isLoading: profileLoading } = useUserProfile();
+  const { balance, refreshBalance, isRefreshing } = useSmsBalance();
 
   const totalCampaigns = campaigns?.length || 0;
   const totalSent = campaigns?.reduce((sum, c) => sum + (c.sent_count || 0), 0) || 0;
   const totalDelivered = campaigns?.reduce((sum, c) => sum + (c.delivered_count || 0), 0) || 0;
   const deliveryRate = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 0;
-  const smsBalance = getSmsBalance();
 
   if (campaignsLoading || profileLoading) {
     return (
@@ -74,8 +75,18 @@ export function ClientMetrics() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">SMS Balance</p>
-              <p className="text-3xl font-bold">{smsBalance.toLocaleString()}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-sm font-medium text-gray-600">SMS Balance</p>
+                <button
+                  onClick={() => refreshBalance()}
+                  disabled={isRefreshing}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  title="Refresh balance"
+                >
+                  <RefreshCw className={`w-3 h-3 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              <p className="text-3xl font-bold">{balance.toLocaleString()}</p>
             </div>
             <CreditCard className="w-8 h-8 text-purple-600" />
           </div>

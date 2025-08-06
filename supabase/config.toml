@@ -83,6 +83,9 @@ verify_jwt = true
 [functions.user-segmentation]
 verify_jwt = true
 
+[functions.mspace-sms-balance]
+verify_jwt = true
+
 [edge-runtime]
 policy = "per_function"
 inspector_port = 8083
