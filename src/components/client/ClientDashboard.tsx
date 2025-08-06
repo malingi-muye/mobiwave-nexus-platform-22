@@ -37,7 +37,7 @@ import { Contacts } from './Contacts';
 
 export function ClientDashboard() {
   const { user } = useAuth();
-  const { getDisplayName } = useUserProfile();
+  const { getDisplayName, getSmsBalance, isLoading: profileLoading } = useUserProfile();
   const { campaigns, isLoading: campaignsLoading } = useCampaigns();
   const { surveys, isLoading: surveysLoading } = useSurveys();
   const { contacts, isLoading: contactsLoading } = useContacts();
@@ -63,7 +63,7 @@ export function ClientDashboard() {
   const activeCampaigns = campaigns?.filter(c => c.status === 'sending' || c.status === 'scheduled') || [];
   const activeSurveys = surveys?.filter(s => s.status === 'active') || [];
   const totalContacts = contacts?.length || 0;
-  const remainingCredits = credits?.credits_remaining || 0;
+  const smsBalance = getSmsBalance();
 
   const recentCampaigns = campaigns?.slice(0, 3) || [];
   const recentSurveys = surveys?.slice(0, 3) || [];
@@ -85,7 +85,7 @@ export function ClientDashboard() {
     }
   };
 
-  if (campaignsLoading || surveysLoading || contactsLoading || creditsLoading) {
+  if (campaignsLoading || surveysLoading || contactsLoading || creditsLoading || profileLoading) {
     return (
       <ClientDashboardLayout>
         <LoadingState message="Loading dashboard..." size="lg" />
@@ -125,7 +125,7 @@ export function ClientDashboard() {
               { title: 'Active Campaigns', value: activeCampaigns.length, icon: Send, path: '/bulk-sms' },
               { title: 'Active Surveys', value: activeSurveys.length, icon: FileText, path: '/surveys' },
               { title: 'Total Contacts', value: totalContacts, icon: Users, path: '/contacts' },
-              { title: 'SMS Credits', value: `${remainingCredits.toFixed(2)}`, icon: CreditCard, path: '/billing' }
+              { title: 'SMS Balance', value: `${smsBalance}`, icon: CreditCard, path: '/billing' }
             ].map((metric, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
