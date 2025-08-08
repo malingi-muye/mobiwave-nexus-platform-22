@@ -3,10 +3,10 @@
 export const securityHeaders = {
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'wasm-unsafe-eval' https://xfwtjndfclckgvpvgiaj.supabase.co",
+    "script-src 'self' 'wasm-unsafe-eval' https://axkvnjozueyhjdmmbjgg.supabase.co",
     "style-src 'self' 'unsafe-inline'", // Will be improved with nonces in production
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://xfwtjndfclckgvpvgiaj.supabase.co wss://xfwtjndfclckgvpvgiaj.supabase.co",
+    "connect-src 'self' https://axkvnjozueyhjdmmbjgg.supabase.co wss://axkvnjozueyhjdmmbjgg.supabase.co",
     "font-src 'self' data:",
     "object-src 'none'",
     "base-uri 'self'",

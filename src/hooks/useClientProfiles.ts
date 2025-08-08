@@ -49,8 +49,7 @@ const createClientProfile = async (profileData: NewClientProfile): Promise<Clien
     throw new Error('User not authenticated');
   }
 
-  // Simple password hashing (in production, use proper bcrypt or similar)
-  const password_hash = btoa(profileData.password); // Base64 encoding for demo
+  // Password hashing is handled securely in the database trigger
 
   const { data, error } = await supabase
     .from('client_profiles')
@@ -58,7 +57,7 @@ const createClientProfile = async (profileData: NewClientProfile): Promise<Clien
       user_id: user.id,
       client_name: profileData.client_name,
       username: profileData.username,
-      password_hash,
+      password_hash: profileData.password,
       email: profileData.email,
       phone: profileData.phone,
       sms_balance: profileData.sms_balance || 0
@@ -79,7 +78,7 @@ const updateClientProfile = async ({ id, updates }: { id: string; updates: Parti
   
   // If password is being updated, hash it
   if ('password' in updates) {
-    updateData.password_hash = btoa((updates as any).password);
+    updateData.password_hash = (updates as any).password;
     delete (updateData as any).password;
   }
 

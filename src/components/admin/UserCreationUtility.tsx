@@ -59,74 +59,9 @@ export function UserCreationUtility() {
     }
   };
 
-  const createPredefinedUsers = async () => {
-    const users = [
-      {
-        email: 'malingib9@gmail.com',
-        password: 'b1216170',
-        firstName: 'Super',
-        lastName: 'Admin',
-        role: 'super_admin' as const
-      },
-      {
-        email: 'grahamjanji@gmail.com',
-        password: 'g1216170',
-        firstName: 'Graham',
-        lastName: 'User',
-        role: 'user' as const
-      }
-    ];
-
-    setIsCreating(true);
-    
-    for (const user of users) {
-      try {
-        const { data, error } = await supabase.auth.admin.createUser({
-          email: user.email,
-          password: user.password,
-          user_metadata: {
-            first_name: user.firstName,
-            last_name: user.lastName,
-            role: user.role
-          },
-          email_confirm: true
-        });
-
-        if (error) {
-          console.error(`Error creating ${user.email}:`, error);
-          toast.error(`Failed to create ${user.email}: ${error.message}`);
-        } else {
-          toast.success(`Created ${user.role}: ${user.email}`);
-        }
-      } catch (error: any) {
-        console.error(`Unexpected error creating ${user.email}:`, error);
-        toast.error(`Failed to create ${user.email}`);
-      }
-    }
-    
-    setIsCreating(false);
-  };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick User Creation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            onClick={createPredefinedUsers}
-            disabled={isCreating}
-            className="w-full mb-4"
-          >
-            {isCreating ? 'Creating Users...' : 'Create Predefined Users'}
-          </Button>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p>• Super Admin: malingib9@gmail.com (password: b1216170)</p>
-            <p>• User: grahamjanji@gmail.com (password: g1216170)</p>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
